@@ -1,0 +1,10 @@
+[workspace]
+restore_data_on_startup = True
+save_data_on_exit = True
+save_history = True
+save_non_project_files = False
+
+[main]
+version = 0.2.0
+recent_files = ['FitExogenous.py', 'FitTrend.py', 'FitSeasonality.py', 'CostFunctions.py', 'SplitProposals.py', 'LazyProphet.py', 'ThymeBoostOptimization.py', 'ThymeBoostEnsembling.py', 'untitled0.py', 'base_fitter.py', 'AutoSmoothers.py', 'ThymeBoost.py', 'assembler.py', 'dash_test.py', 'apolloai.py']
+
