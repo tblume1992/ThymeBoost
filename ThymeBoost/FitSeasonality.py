@@ -3,65 +3,6 @@ import numpy as np
 
 class FitSeasonality:
     """Approximates the seasonal component
-    
-        Parameters
-        ----------
-        poly : int
-            Polynomial expansion for linear models.       
-        
-        trend_estimator : str
-            The estimator to use to approximate trend.
-        
-        fit_type : str
-            Whether a 'global' or 'local' fit is used.  This parameter
-            should be set to 'global' for loess and ewm.
-                   
-        given_splits : list
-            Splits to use when using fit_type='local'.
-        
-        exclude_splits : list
-            exclude these index when considering splits for 
-            fit_type='local'.  Must be idx not datetimeindex if 
-            using a Pandas Series.
-                         
-        min_sample_pct : float 
-            Percentage of samples required to consider a split. 
-            Must be 0<min_sample_pct<=1.
-        
-        n_split_proposals : int
-            Number of split proposals based on the gradients.
-                            
-        approximate_splits : boolean
-            Whether to use proposal splits based on gradients
-            or exhaustively try splits with at least 
-            min_sample_pct samples.
-            
-        l2 : float
-            l2 regularization to apply.  Must be >0.
-            
-        split_cost : str
-            What cost function to use when selecting the split, selections are
-            'mse' or 'mae'.
-            
-        trend_lr : float
-            Applies a learning rate in accordance to standard gradient boosting
-            such that the trend = trend * trend_lr at each iteration.
-            
-        forecast_horizon : int
-            Number of steps to take in forecasting out-of-sample.
-            
-        window_size : int
-            How many samples are taken into account for sliding window methods
-            such as loess and ewm.
-        
-        smoothed : boolean
-            Whether to smooth the resulting trend or not, by default not too
-            much smoothing is applied just enough to smooth the kinks.
-        
-        RETURNS
-        ----------
-        numpy array : the trend component
-        numpy array : the predicted trend component
         
     """
     def __init__(self, seasonal_estimator,
