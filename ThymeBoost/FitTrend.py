@@ -2,8 +2,8 @@
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import PolynomialFeatures
-from CostFunctions import get_split_cost
-from SplitProposals import SplitProposals
+from ThymeBoost.CostFunctions import get_split_cost
+from ThymeBoost.SplitProposals import SplitProposals
 import statsmodels as sm
 from scipy.signal import savgol_filter
 from statsmodels.tsa.api import SimpleExpSmoothing, Holt

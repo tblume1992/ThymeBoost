@@ -5,12 +5,10 @@ import numpy as np
 from scipy import stats
 from itertools import cycle
 import matplotlib.pyplot as plt
-from FitTrend import FitTrend
-from FitSeasonality import FitSeasonality
-from FitExogenous import FitExogenous
-from CostFunctions import calc_cost
-import seaborn as sns
-sns.set_style('darkgrid')
+from ThymeBoost.FitTrend import FitTrend
+from ThymeBoost.FitSeasonality import FitSeasonality
+from ThymeBoost.FitExogenous import FitExogenous
+from ThymeBoost.CostFunctions import calc_cost
 import warnings
 warnings.filterwarnings("ignore")
 

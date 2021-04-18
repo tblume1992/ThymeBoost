@@ -1,4 +1,5 @@
 README.md
+setup.cfg
 setup.py
 ThymeBoost/CostFunctions.py
 ThymeBoost/FitExogenous.py
@@ -10,4 +11,5 @@ ThymeBoost/__init__.py
 ThymeBoost.egg-info/PKG-INFO
 ThymeBoost.egg-info/SOURCES.txt
 ThymeBoost.egg-info/dependency_links.txt
+ThymeBoost.egg-info/requires.txt
 ThymeBoost.egg-info/top_level.txt
