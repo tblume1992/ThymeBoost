@@ -92,6 +92,8 @@ class ThymeBoost:
 
     """
     __framework__ = 'main'
+    version = '0.1.0'
+    author 'Tyler Blume'
 
     def __init__(self,
                  verbose=0,
@@ -658,7 +660,7 @@ if __name__ == '__main__':
                                 approximate_splits=True,
                                 n_split_proposals=25,
                                 #n_rounds=30,
-                                verbose=1,
+                                verbose=0,
                                 cost_penalty=.001,
                                 )
     opt = boosted_model.optimize(y_train,
@@ -674,15 +676,16 @@ if __name__ == '__main__':
                                              exogenous=X_train,
                                              exogenous_estimator='decision_tree')
     output = boosted_model.ensemble(y_train,
+                                    verbose=1,
                                         trend_estimator=['mean', 'linear', 'median'],
                                         fit_type=['local', 'global'],
                                         seasonal_period=[365, None],
                                         exogenous=[X_train],
-                                        exogenous_estimator=['ols'],
-                                        arima_order=[(1, 0, 1), (1, 0, 0)])
+                                        exogenous_estimator=['ols', 'decision_tree'],
+                                        tree_depth=[1,2,3])
     output = boosted_model.fit(y_train,
                                 trend_estimator='linear',
-                                seasonal_estimator='fourier',
+                                seasonal_estimator='classic',
                                 split_cost='mse',
                                 global_cost='maicc',
                                 exogenous_estimator='decision_tree',
@@ -703,24 +706,18 @@ if __name__ == '__main__':
     output = boosted_model.update(output, y_test[:100])
     look = boosted_model.booster_obj.seasonal_pred_params
     predicted_output = boosted_model.predict(fitted_output=opt,
-                                             future_exogenous=X_test,
+                                             #future_exogenous=X_test,
                                              forecast_horizon=50)
     predicted_trend = output['trend'].append(predicted_output['predicted_trend'])
     te = time.time()
     print(te - ts)
     plt.plot(np.append(output['seasonality'].values, predicted_output['predicted_seasonality'].values))
-    boosted_model.plot_results(outliers)
-    boosted_model.plot_components(outliers)
+    boosted_model.plot_results(output, predicted_output)
+    boosted_model.plot_components(output, predicted_output)
     plt.plot(data['Low'].iloc[-930:].values)
     plt.plot(np.append(output['trend'], predicted_output['predicted_trend']))
     plt.plot(np.append(output['yhat'], predicted_output['predictions']))
     plt.show()
-    look = boosted_model.__dict__
-    look = boosted_model.combine(['l', 'p'])
-    import types
-    isinstance([look], types.FunctionType)
-    type(look)
-    print(look)
 
 # # %%
 #     import matplotlib.pyplot as plt
