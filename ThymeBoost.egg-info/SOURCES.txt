@@ -7,6 +7,7 @@ ThymeBoost/FitSeasonality.py
 ThymeBoost/FitTrend.py
 ThymeBoost/SplitProposals.py
 ThymeBoost/ThymeBoost.py
+ThymeBoost/ThymeBoostOptimizer.py
 ThymeBoost/__init__.py
 ThymeBoost.egg-info/PKG-INFO
 ThymeBoost.egg-info/SOURCES.txt
