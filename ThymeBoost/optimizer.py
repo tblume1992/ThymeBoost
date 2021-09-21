@@ -9,7 +9,7 @@ from tqdm import tqdm
 import numpy as np
 from ThymeBoost.cost_functions import calc_smape, calc_mape, calc_mse, calc_mae
 from ThymeBoost.param_iterator import ParamIterator
-from ThymeBoost.ThymeBoost import ThymeBoost
+import ThymeBoost
 
 
 class Optimizer(ParamIterator):

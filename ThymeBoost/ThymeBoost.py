@@ -38,7 +38,6 @@ from ThymeBoost.optimizer import Optimizer
 from ThymeBoost.ensemble import Ensemble
 from ThymeBoost.utils import plotting
 from ThymeBoost.utils import build_output
-from ThymeBoost.cost_functions import calc_cost
 from ThymeBoost.predict_functions import predict_rounds
 warnings.filterwarnings("ignore")
 
@@ -93,7 +92,7 @@ class ThymeBoost:
     """
     __framework__ = 'main'
     version = '0.1.0'
-    author 'Tyler Blume'
+    author = 'Tyler Blume'
 
     def __init__(self,
                  verbose=0,
@@ -569,61 +568,8 @@ class ThymeBoost:
         """
         plotting.plot_components(fitted, predicted, figsize)
 
-    #TODO: Fix update methods for online learning
-    # def update_booster_params(self,
-    #                           residual_component,
-    #                           new_series,
-    #                           current_prediction,
-    #                           predicted_trend,
-    #                           predicted_seasonality,
-    #                           ):
-    #     self.booster_obj.i = self.booster_obj.i - 1
-    #     self.num_rounds = self.booster_obj.i
-    #     self.booster_obj.boosted_data = residual_component.values
-    #     self.booster_obj.time_series = self.time_series
-    #     self.booster_obj.time_series_index = self.time_series_index
-    #     self.booster_obj.trends = [predicted_trend]
-    #     self.booster_obj.seasonalities = [predicted_seasonality]
-    #     self.booster_obj.fitted_exogenous = [np.append(i, np.zeros(len(new_series))) for i in self.booster_obj.fitted_exogenous]
-    #     updated_cost = calc_cost(self.time_series,
-    #                              current_prediction,
-    #                              self.booster_obj.c,
-    #                              self.booster_obj.regularization,
-    #                              self.booster_obj.boosting_params['global_cost'])
-    #     self.booster_obj.cost = updated_cost
 
-    # def update(self, fitted_output, new_series, **kwargs):
-    #     predicted_output = self.predict(fitted_output, len(new_series))
-    #     total_trend = fitted_output['trend'].append(predicted_output['predicted_trend'])
-    #     total_prediction = fitted_output['yhat'].append(predicted_output['predictions'])
-    #     total_seasonality = fitted_output['seasonality'].append(predicted_output['predicted_seasonality'])
-    #     if not isinstance(new_series, pd.Series):
-    #         new_series = pd.Series(new_series)
-    #     new_series.index = predicted_output.index
-    #     full_series = fitted_output['y'].append(new_series)
-    #     self.time_series = full_series.values
-    #     self.time_series_index = full_series.index
-    #     residual_component = fitted_output['y'] - fitted_output['yhat']
-    #     residual_component = residual_component.append(new_series - predicted_output['predictions'])
-    #     self.update_booster_params(residual_component,
-    #                                new_series,
-    #                                current_prediction=total_prediction.values,
-    #                                predicted_trend=total_trend.values,
-    #                                predicted_seasonality=total_seasonality.values,
-    #                                )
-    #     updated_results = self.booster_obj.boost()
-    #     fitted_trend = updated_results[0]
-    #     fitted_seasonality = updated_results[1]
-    #     fitted_exogenous = updated_results[2]
-    #     self.c = self.booster_obj.c
-    #     self.builder = build_output.BuildOutput(self.time_series,
-    #                                             self.time_series_index,
-    #                                             self.unscale_input,
-    #                                             self.c)
-    #     output = self.builder.build_fitted_df(fitted_trend,
-    #                                           fitted_seasonality,
-    #                                           fitted_exogenous)
-    #     return output
+
 
 
 

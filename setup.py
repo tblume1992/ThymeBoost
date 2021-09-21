@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="ThymeBoost",
-    version="0.0.9",
+    version="0.1.0",
     author="Tyler Blume",
     description = "Spicy time series forecasting.",
     author_email = 'tblume@mail.USF.edu', 
