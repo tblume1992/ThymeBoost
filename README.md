@@ -3,7 +3,7 @@ ThymeBoost combines time series decomposition with gradient boosting to provide 
 
 Basic flow of the algorithm:
 
-![alt text](https://github.com/tblume1992/ThymeBoost/static/lp_flow.PNG?raw=true "Output 1")
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/lp_flow.png?raw=true "Output 1")
 
 
 ## Quick Start.
@@ -31,8 +31,9 @@ noise = np.random.normal(0, 1, 100)
 y = true + noise + seasonality
 plt.plot(y)
 plt.show()
+
 ```
-![alt text](https://github.com/tblume1992/ThymeBoost/static/time_series.PNG?raw=true "Output 1")
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/blob/main/static/time_series.png)
 Firt we will build the ThymeBoost model object:
 ```
 boosted_model = ThymeBoost(approximate_splits=True,
@@ -61,14 +62,14 @@ Now that we have fitted we can take a look at our results
 boosted_model.plot_results(output)
 ```
 
-![alt text](https://github.com/tblume1992/ThymeBoost/static/tb_output_1.PNG?raw=true "Output 1")
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/tb_output_1.png?raw=true "Output 1")
 
 The fit looks correct enough, but let's take a look at the indiviudal components we fitted.
 ```
 boosted_model.plot_components(output)
 ```
 
-![alt text](https://github.com/tblume1992/ThymeBoost/static/tb_components_1.PNG?raw=true "Output 1")
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/tb_components_1.png?raw=true "Output 1")
 
 Alright, the decomposition looks reasonable as well but let's complicate the task by now adding a changepoint.
 
@@ -82,7 +83,7 @@ plt.plot(y)
 plt.show()
 ```
 
-![alt text](https://github.com/tblume1992/ThymeBoost/static/time_series_2.PNG?raw=true "Output 1")
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/time_series_2.png?raw=true "Output 1")
 
 In order to fit this we will change ```fit_type='global'``` to ```fit_type='local'```.  Let's see what happens.
 
@@ -109,7 +110,7 @@ Here we add in the predict method which takes in the fitted results as well as t
 boosted_model.plot_results(output, predicted_output)
 ```
 
-![alt text](https://github.com/tblume1992/ThymeBoost/static/tb_output_2.PNG?raw=true "Output 1")
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/tb_output_2.png?raw=true "Output 1")
 
 
 Ok, cool. Looks like it worked about as expected here, we did do 1 wasted round where ThymeBoost just did a slight adjustment at split 80 but that can be fixed as you will see!
@@ -119,7 +120,7 @@ Once again looking at the components:
 boosted_model.plot_components(output)
 ```
 
-![alt text](https://github.com/tblume1992/ThymeBoost/static/tb_components_2.PNG?raw=true "Output 1")
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/tb_components_2.png?raw=true "Output 1")
 
 
 There is a kink in the trend right around 100 as to be expected.
@@ -137,7 +138,7 @@ plt.plot(y)
 plt.show()
 ```
 
-![alt text](https://github.com/tblume1992/ThymeBoost/static/complicated_time_series.PNG?raw=true "Output 1")
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/complicated_time_series.png?raw=true "Output 1")
 
 
 So here we have 3 distinct trend lines and one large shift upward.  Overall, pretty nasty and automatically fitting this with any model (including ThymeBoost) can have extremely wonky results.
@@ -209,7 +210,7 @@ Let's take a look at the results:
 boosted_model.plot_results(output, predicted_output)
 ```
 
-![alt text](https://github.com/tblume1992/ThymeBoost/static/complicated_output_bad.PNG?raw=true "Output 1")
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/complicated_output_bad.png?raw=true "Output 1")
 
 Hmmm, that looks very wonky.
 
@@ -238,7 +239,7 @@ predicted_output = boosted_model.predict(output, 100)
 boosted_model.plot_results(output, predicted_output)
 ```
 
-![alt text](https://github.com/tblume1992/ThymeBoost/static/tb_complicated_output.PNG?raw=true "Output 1")
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/tb_complicated_output.png?raw=true "Output 1")
 
 Alright, that looks a ton better. It does have some underfitting going on in the middle which is typical since we are using binary segmentation for the changepoints.  But other than that it seems reasonable.  Let's take a look at the components:
 
@@ -246,7 +247,7 @@ Alright, that looks a ton better. It does have some underfitting going on in the
 boosted_model.plot_components(output)
 ```
 
-![alt text](https://github.com/tblume1992/ThymeBoost/static/complicated_components.PNG?raw=true "Output 1")
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/complicated_components.png?raw=true "Output 1")
 
 
 Looks like the model is catching on to the underlying process creating the data.  The trend is clearly composed of three segments and has that large jump right at 200 just as we hoped to see!
@@ -276,7 +277,7 @@ predicted_output = boosted_model.predict(output, 100)
 boosted_model.plot_components(output)
 ```
 
-![alt text](https://github.com/tblume1992/ThymeBoost/static/n_rounds1.PNG?raw=true "Output 1")
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/n_rounds1.png?raw=true "Output 1")
 
 
 By passing ```n_rounds=1``` we only allow ThymeBoost to do the initial trend estimation (a simple median) and one shot at approximating the seasonality.
@@ -412,7 +413,7 @@ predicted_output = boosted_model.predict(output, 100)
 boosted_model.plot_results(output, predicted_output)
 ```
 
-![alt text](https://github.com/tblume1992/ThymeBoost/static/optimizer_output.PNG?raw=true "Output 1")
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/optimizer_output.png?raw=true "Output 1")
 
 So this output looks wonky around that changepoint but it recovers in time to produce a good enough forecast to do well in the holdout.
 
@@ -439,7 +440,7 @@ predicted_output = boosted_model.predict(output, 100)
 boosted_model.plot_results(output, predicted_output)
 ```
 
-![alt text](https://github.com/tblume1992/ThymeBoost/static/optimizer_output.PNG?raw=true "Output 1")
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/optimizer_output.png?raw=true "Output 1")
 
 Obviously, this output is quite wonky.  Primarily because of the 'global' parameter which is pulling everything to the center of the data.  However, ensembling has been shown to be quite effective in the wild.
 
@@ -484,7 +485,7 @@ Let's take a look at the outputs:
 boosted_model.plot_results(output, predicted_output)
 ```
 
-![alt text](https://github.com/tblume1992/ThymeBoost/static/optimized_ensemble.png?raw=true "Output 1")
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/optimized_ensemble.png?raw=true "Output 1")
 
 
 # ToDo
