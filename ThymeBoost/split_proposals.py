@@ -51,6 +51,15 @@ class SplitProposals:
         self.approximate_splits = approximate_splits
 
     def get_approximate_split_proposals(self):
+        """
+        Propose indices to split the data on, proposals based on gradient
+
+        Returns
+        -------
+        proposals : list
+            The proposals to try out.
+
+        """
         gradient = pd.Series(np.abs(np.gradient(self.time_series, edge_order=1)))
         gradient = gradient.sort_values(ascending=False)[:self.n_split_proposals]
         proposals = list(gradient.index)

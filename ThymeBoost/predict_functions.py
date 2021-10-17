@@ -51,6 +51,7 @@ def predict_seasonality(booster_obj, boosting_round, forecast_horizon):
         seas_round = seas_model.predict(forecast_horizon, seas_param)
     return seas_round
 
+
 def predict_exogenous(booster_obj,
                       future_exo,
                       boosting_round,

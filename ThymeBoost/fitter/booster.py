@@ -116,7 +116,10 @@ class booster(Decompose):
                 #TODO replace with logging
                     print(f'''{"*"*10} Round {self.i+1} {"*"*10}''')
                     print(f'''Using Split: {self.split}''')
-                    print(f'''Fitting {self.boosting_params['fit_type']} with trend model:''')
+                    if self.i == 0:
+                        print(f'''Fitting initial trend globally with trend model:''')
+                    else:
+                        print(f'''Fitting {self.boosting_params['fit_type']} with trend model:''')
                     print(f'''{str(self.trend_objs[-1].model_obj)}''')
                     print(f'''seasonal model:''')
                     print(f'''{str(self.seasonal_objs[-1].model_obj)}''')

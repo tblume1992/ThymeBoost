@@ -8,9 +8,10 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-build/
-develop-eggs/
+_build/
+Thymeboost.egg-info/
 dist/
+docs/
 downloads/
 eggs/
 .eggs/

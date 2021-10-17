@@ -569,9 +569,194 @@ class ThymeBoost:
         plotting.plot_components(fitted, predicted, figsize)
 
 
+if __name__ == '__main__':
+    #Some Examples
+    import numpy as np
+    import matplotlib.pyplot as plt
+    
+    
+    #Here we will just create a random series with seasonality and a slight trend
+    seasonality = ((np.cos(np.arange(1, 101))*10 + 50))
+    np.random.seed(100)
+    true = np.linspace(-1, 1, 100)
+    noise = np.random.normal(0, 1, 100)
+    y = true + noise + seasonality
+    plt.plot(y)
+    plt.show()
 
 
+    boosted_model = ThymeBoost(
+                                approximate_splits=True,
+                                n_split_proposals=25,
+                                verbose=1,
+                                cost_penalty=.001,
+                                )
+    
+    output = boosted_model.fit(y,
+                               trend_estimator='linear',
+                               seasonal_estimator='fourier',
+                               seasonal_period=25,
+                               split_cost='mse',
+                               global_cost='maicc',
+                               fit_type='global')
 
 
+    boosted_model.plot_results(output)
+    boosted_model.plot_components(output)
+
+    true = np.linspace(1, 50, 100)
+    noise = np.random.normal(0, 1, 100)
+    y = np.append(y, true + noise + seasonality)
+    plt.plot(y)
+    plt.show()
+    boosted_model = ThymeBoost(
+                                approximate_splits=True,
+                                n_split_proposals=25,
+                                verbose=1,
+                                cost_penalty=.001,
+                                )
+    
+    output = boosted_model.fit(y,
+                               trend_estimator='linear',
+                               seasonal_estimator='fourier',
+                               seasonal_period=25,
+                               split_cost='mse',
+                               global_cost='maicc',
+                               fit_type='local')
+
+    predicted_output = boosted_model.predict(output, 100)
+    boosted_model.plot_results(output, predicted_output)
+    boosted_model.plot_components(output)
+
+    #Pretty complicated model with complex seasonality
+    true = np.linspace(1, 20, 100) + 100
+    noise = np.random.normal(0, 1, 100)
+    y = np.append(y, true + noise + seasonality)
+
+
+    boosted_model = ThymeBoost(
+                                approximate_splits=True,
+                                verbose=1,
+                                cost_penalty=.001,
+                                )
+    
+    output = boosted_model.fit(y,
+                               trend_estimator=['mean'] + ['linear']*20,
+                               seasonal_estimator='fourier',
+                               seasonal_period=[25, 0],
+                               split_cost='mae',
+                               global_cost='maicc',
+                               fit_type='local',
+                               connectivity_constraint=True,
+                               )
+    predicted_output = boosted_model.predict(output, 100)
+    boosted_model.plot_results(output, predicted_output)
+    boosted_model.plot_components(output)
+
+    #Without connectivity constraint
+    boosted_model = ThymeBoost(
+                                approximate_splits=True,
+                                verbose=1,
+                                cost_penalty=.001,
+                                )
+    
+    output = boosted_model.fit(y,
+                               trend_estimator='linear',
+                               seasonal_estimator='fourier',
+                               seasonal_period=[25, 0],
+                               split_cost='mae',
+                               global_cost='maicc',
+                               fit_type='local',
+                               connectivity_constraint=False,
+                               )
+    predicted_output = boosted_model.predict(output, 100)
+    boosted_model.plot_results(output, predicted_output)
+    boosted_model.plot_components(output)
+
+
+    #Without connectivity constraint and increased regularization term
+    boosted_model = ThymeBoost(
+                                approximate_splits=True,
+                                verbose=1,
+                                cost_penalty=.001,
+                                regularization=2.0,
+                                )
+    
+    output = boosted_model.fit(y,
+                               trend_estimator='linear',
+                               seasonal_estimator='fourier',
+                               seasonal_period=[25, 0],
+                               split_cost='mae',
+                               global_cost='maicc',
+                               fit_type='local',
+                               connectivity_constraint=False,
+                               )
+    predicted_output = boosted_model.predict(output, 100)
+    boosted_model.plot_results(output, predicted_output)
+    boosted_model.plot_components(output)
+
+    #n_rounds=1
+    boosted_model = ThymeBoost(
+                                approximate_splits=True,
+                                verbose=1,
+                                cost_penalty=.001,
+                                n_rounds=1
+                                )
+    
+    output = boosted_model.fit(y,
+                               trend_estimator='arima',
+                               arima_order=(1, 0, 1),
+                               seasonal_estimator='fourier',
+                               seasonal_period=[25, 0],
+                               split_cost='mae',
+                               global_cost='maicc',
+                               fit_type='global',
+                               )
+    predicted_output = boosted_model.predict(output, 100)
+    boosted_model.plot_results(output, predicted_output)
+    boosted_model.plot_components(output)
+
+    #n_rounds=2
+    boosted_model = ThymeBoost(
+                                approximate_splits=True,
+                                verbose=1,
+                                cost_penalty=.001,
+                                n_rounds=2
+                                )
+    
+    output = boosted_model.fit(y,
+                               trend_estimator='arima',
+                               arima_order=(1, 0, 1),
+                               seasonal_estimator='fourier',
+                               seasonal_period=[25, 0],
+                               split_cost='mae',
+                               global_cost='maicc',
+                               fit_type='global',
+                               )
+    predicted_output = boosted_model.predict(output, 100)
+    boosted_model.plot_results(output, predicted_output)
+    boosted_model.plot_components(output)
+
+    #seasonality regularization
+    boosted_model = ThymeBoost(
+                                approximate_splits=True,
+                                verbose=1,
+                                cost_penalty=.001,
+                                n_rounds=2
+                                )
+    
+    output = boosted_model.fit(y,
+                               trend_estimator='arima',
+                               arima_order=(1, 0, 1),
+                               seasonal_estimator='fourier',
+                               seasonal_period=[25, 0],
+                               split_cost='mae',
+                               global_cost='maicc',
+                               fit_type='global',
+                               seasonality_lr=.1
+                               )
+    predicted_output = boosted_model.predict(output, 100)
+    boosted_model.plot_results(output, predicted_output)
+    boosted_model.plot_components(output)
 
 
