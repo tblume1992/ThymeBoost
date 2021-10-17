@@ -1,5 +1,5 @@
 # ThymeBoost
-ThymeBoost combines time series decomposition with gradient boosting to provide a flexible mix-and-match time series framework for spicy forecasting. At the most granular level are the trend/level (going forward this is just referred to as 'trend') models, seasonal models, and edogenous models. These are used to approximate the respective components at each 'boosting round' and sequential rounds are fit on residuals in usual boosting fashion.
+ThymeBoost combines time series decomposition with gradient boosting to provide a flexible mix-and-match time series framework for spicy forecasting. At the most granular level are the trend/level (going forward this is just referred to as 'trend') models, seasonal models, and endogenous models. These are used to approximate the respective components at each 'boosting round' and sequential rounds are fit on residuals in usual boosting fashion.
 
 Basic flow of the algorithm:
 
@@ -7,6 +7,7 @@ Basic flow of the algorithm:
 
 
 ## Quick Start.
+
 ```
 pip install ThymeBoost
 ```
@@ -57,7 +58,7 @@ We pass the input time_series and the parameters used to fit.  For ThymeBoost th
 
 With verbose ThymeBoost will print out some relevant information for us.
 
-Now that we have fitted we can take a look at our results
+Now that we have fitted our series we can take a look at our results
 ```
 boosted_model.plot_results(output)
 ```
@@ -143,7 +144,7 @@ plt.show()
 
 So here we have 3 distinct trend lines and one large shift upward.  Overall, pretty nasty and automatically fitting this with any model (including ThymeBoost) can have extremely wonky results.
 
-But...let's try anyway.  Here we will utilize the 'generator' variables.  As menetioned, everything passed in to the fit method is a generator variable.  This basically means that we can pass a list for a parameter and that list will be cycled through at each boosting round. So if we pass this: ```trend_estimator=['mean', 'linear']``` after the initial trend estimation using the median we then use mean followed by linear then mean and linear until boosting is terminated.  We can also use this to approximate a potential complex seasonality jsut by passing a list of what the complex seasonality can be.  Let's fit with these generator variables and pay close attention to the print out as it will show you what ThymeBoost is doing at each round.
+But...let's try anyway.  Here we will utilize the 'generator' variables.  As mentioned before, everything passed in to the fit method is a generator variable.  This basically means that we can pass a list for a parameter and that list will be cycled through at each boosting round. So if we pass this: ```trend_estimator=['mean', 'linear']``` after the initial trend estimation using the median we then use mean followed by linear then mean and linear until boosting is terminated.  We can also use this to approximate a potential complex seasonality just by passing a list of what the complex seasonality can be.  Let's fit with these generator variables and pay close attention to the print out as it will show you what ThymeBoost is doing at each round.
 
 ```
 boosted_model = ThymeBoost(
@@ -401,7 +402,7 @@ Params ensembled: False
 ```
 
 
-First off, I disabled the verbose call in the constructor so it won't print out everything for each model.  Instead, passing ```verbose=1``` to the optimie method will print a tqdm progress bar and the best model configuration.  Lag refers to the number of points to holdout for our test set and optimization_steps allows you to roll through the holdout.
+First off, I disabled the verbose call in the constructor so it won't print out everything for each model.  Instead, passing ```verbose=1``` to the optimize method will print a tqdm progress bar and the best model configuration.  Lag refers to the number of points to holdout for our test set and optimization_steps allows you to roll through the holdout.
 
 Another important thing to note, one of the elements in the list of trend_estimators is itself a list.  With optimization, all we do is try each combination of the parameters given so each element in the list provided will be passed to the normal fit method, if that element is a list then that means you are using a generator variable for that implementation.
 
@@ -492,4 +493,4 @@ boosted_model.plot_results(output, predicted_output)
 
 The package is still under heavy development and with the large number of combinations that arise from the framework if you find any issues definitely raise them!
 
-Logging and error handling is still basic to non-existant so it is one of our top priorities.
+Logging and error handling is still basic to non-existent, so it is one of our top priorities.
