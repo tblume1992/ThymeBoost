@@ -6,8 +6,11 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="ThymeBoost",
-    version="0.1.0",
+    version="0.1.1",
     author="Tyler Blume",
+    url="https://github.com/tblume1992/ThymeBoost",
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     description = "Spicy time series forecasting.",
     author_email = 'tblume@mail.USF.edu', 
     keywords = ['forecasting', 'time series', 'seasonality', 'trend'],
@@ -18,7 +21,8 @@ setuptools.setup(
                         'scikit-learn',
                         'scipy',
                         'more-itertools',
-                        'matplotlib'
+                        'matplotlib',
+                        'tqdm'
                         ],
     packages=setuptools.find_packages(),
     classifiers=[
