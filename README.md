@@ -20,7 +20,7 @@ Starting with a very simple example of a simple trend + seasonality + noise
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-from ThymeBoost.ThymeBoost import ThymeBoost as tb
+from ThymeBoost import ThymeBoost as tb
 
 sns.set_style('darkgrid')
 
@@ -39,7 +39,7 @@ plt.show()
 
 First we will build the ThymeBoost model object:
 ```
-boosted_model = ThymeBoost(approximate_splits=True,
+boosted_model = tb.ThymeBoost(approximate_splits=True,
                               n_split_proposals=25,
                               verbose=1,
                               cost_penalty=.001)
@@ -91,7 +91,7 @@ plt.show()
 In order to fit this we will change ```fit_type='global'``` to ```fit_type='local'```.  Let's see what happens.
 
 ```
-boosted_model = ThymeBoost(
+boosted_model = tb.ThymeBoost(
                             approximate_splits=True,
                             n_split_proposals=25,
                             verbose=1,
@@ -149,7 +149,7 @@ So here we have 3 distinct trend lines and one large shift upward.  Overall, pre
 But...let's try anyway.  Here we will utilize the 'generator' variables.  As mentioned before, everything passed in to the fit method is a generator variable.  This basically means that we can pass a list for a parameter and that list will be cycled through at each boosting round. So if we pass this: ```trend_estimator=['mean', 'linear']``` after the initial trend estimation using the median we then use mean followed by linear then mean and linear until boosting is terminated.  We can also use this to approximate a potential complex seasonality just by passing a list of what the complex seasonality can be.  Let's fit with these generator variables and pay close attention to the print out as it will show you what ThymeBoost is doing at each round.
 
 ```
-boosted_model = ThymeBoost(
+boosted_model = tb.ThymeBoost(
                             approximate_splits=True,
                             verbose=1,
                             cost_penalty=.001,
@@ -223,8 +223,8 @@ To account for this, let's relax connectivity constraints and just try linear es
 
 ```
 #Without connectivity constraint
-boosted_model = ThymeBoost(
-                            approximate_splits=False,
+boosted_model = tb.ThymeBoost(
+                            approximate_splits=True,
                             verbose=1,
                             cost_penalty=.001,
                             )
@@ -260,7 +260,7 @@ Looks like the model is catching on to the underlying process creating the data.
 We can control how many rounds and therefore the complexity of our model a couple of different ways.  The most direct is by controlling the number of rounds.
 ```
 #n_rounds=1
-boosted_model = ThymeBoost(
+boosted_model = tb.ThymeBoost(
                             approximate_splits=True,
                             verbose=1,
                             cost_penalty=.001,
@@ -290,7 +290,7 @@ Additionally we are trying out a new ```trend_estimator``` along with the relate
 Let's try forcing ThymeBoost to go through all of our provided ARIMA orders by setting ```n_rounds=4```
 
 ```
-boosted_model = ThymeBoost(
+boosted_model = tb.ThymeBoost(
                             approximate_splits=True,
                             verbose=1,
                             cost_penalty=.001,
@@ -352,25 +352,25 @@ Another idea taken from gradient boosting is the use of a learning rate.  Howeve
 Here is a quick example, as always we could pass it as a list if we want to allow seasonality to return to normal after the first round.
 
 ```
-    #seasonality regularization
-    boosted_model = ThymeBoost(
-                                approximate_splits=True,
-                                verbose=1,
-                                cost_penalty=.001,
-                                n_rounds=2
-                                )
-    
-    output = boosted_model.fit(y,
-                               trend_estimator='arima',
-                               arima_order=(1, 0, 1),
-                               seasonal_estimator='fourier',
-                               seasonal_period=25,
-                               split_cost='mae',
-                               global_cost='maicc',
-                               fit_type='global',
-                               seasonality_lr=.1
-                               )
-    predicted_output = boosted_model.predict(output, 100)
+#seasonality regularization
+boosted_model = tb.ThymeBoost(
+                            approximate_splits=True,
+                            verbose=1,
+                            cost_penalty=.001,
+                            n_rounds=2
+                            )
+
+output = boosted_model.fit(y,
+                           trend_estimator='arima',
+                           arima_order=(1, 0, 1),
+                           seasonal_estimator='fourier',
+                           seasonal_period=25,
+                           split_cost='mae',
+                           global_cost='maicc',
+                           fit_type='global',
+                           seasonality_lr=.1
+                           )
+predicted_output = boosted_model.predict(output, 100)
 ```
 
 ## Parameter Optimization
@@ -382,7 +382,7 @@ Importantly, all parameters that are normally pass to fit must now be passed as 
 Let's take a look:
 
 ```
-boosted_model = ThymeBoost(
+boosted_model = tb.ThymeBoost(
                            approximate_splits=True,
                            verbose=0,
                            cost_penalty=.001,
@@ -424,10 +424,10 @@ So this output looks wonky around that changepoint but it recovers in time to pr
 
 Instead of iterating through and choosing the best parameters we could also just ensemble them into a simple average of every parameter setting.
 
-Everything from the optimizer hold for ensemble as well, except now we just call the ensemble method.
+Everything stated about the optimizer holds for ensemble as well, except now we just call the ensemble method.
 
 ```
-boosted_model = ThymeBoost(
+boosted_model = tb.ThymeBoost(
                            approximate_splits=True,
                            verbose=0,
                            cost_penalty=.001,
@@ -443,7 +443,7 @@ predicted_output = boosted_model.predict(output, 100)
 boosted_model.plot_results(output, predicted_output)
 ```
 
-![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/optimizer_output.png?raw=true "Output 1")
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/ensemble_output.png?raw=true)
 
 Obviously, this output is quite wonky.  Primarily because of the 'global' parameter which is pulling everything to the center of the data.  However, ensembling has been shown to be quite effective in the wild.
 
@@ -456,7 +456,7 @@ The answer is yes!
 But to do it we have to use a new function in our optimize method.  Here is an example:
 
 ```
-boosted_model = ThymeBoost(
+boosted_model = tb.ThymeBoost(
                            approximate_splits=True,
                            verbose=0,
                            cost_penalty=.001,
