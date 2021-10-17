@@ -3,7 +3,7 @@ ThymeBoost combines time series decomposition with gradient boosting to provide 
 
 Basic flow of the algorithm:
 
-![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/lp_flow.png?raw=true "Output 1")
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/thymeboost_flow.png?raw=true "Output 1")
 
 
 ## Quick Start.
@@ -34,7 +34,9 @@ plt.plot(y)
 plt.show()
 
 ```
-![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/blob/main/static/time_series.png)
+
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/time_series.png)
+
 First we will build the ThymeBoost model object:
 ```
 boosted_model = ThymeBoost(approximate_splits=True,
