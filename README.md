@@ -34,7 +34,7 @@ plt.show()
 
 ```
 ![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/blob/main/static/time_series.png)
-Firt we will build the ThymeBoost model object:
+First we will build the ThymeBoost model object:
 ```
 boosted_model = ThymeBoost(approximate_splits=True,
                               n_split_proposals=25,
