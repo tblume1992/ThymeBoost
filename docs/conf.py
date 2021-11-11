@@ -34,7 +34,8 @@ extensions = ['sphinx.ext.napoleon',
               #'myst_parser',
               'sphinx.ext.mathjax',
               'sphinx_rtd_theme',
-              'm2r2']
+              #'m2r2'
+              ]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
