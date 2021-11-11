@@ -67,6 +67,8 @@ class ParamIterator:
         params['exogenous'] = exogenous
         return params
 
+
+
     def sanitize_params(self, param_list):
         """
         Iterate through param dicts to sanitize illegal combinations.
@@ -83,4 +85,6 @@ class ParamIterator:
 
         """
         cleaned = [self.param_check(i) for i in param_list]
-        return [i for n, i in enumerate(cleaned) if i not in cleaned[n + 1:]]
+        #drop duplicate settings breaks with arrays from seasonality_weights
+        #return [i for n, i in enumerate(cleaned) if i not in cleaned[n + 1:]]
+        return cleaned

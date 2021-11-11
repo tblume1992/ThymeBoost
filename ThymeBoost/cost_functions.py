@@ -5,6 +5,31 @@ from scipy.stats import entropy
 
 
 def get_split_cost(time_series, split1, split2, split_cost):
+    """
+    Calculate the cost for the given split point using binary segmentation.
+
+    Parameters
+    ----------
+    time_series : np.array
+        The input time series.
+    split1 : np.array
+        The first split of the binary segmentation.
+    split2 : np.array
+        The second split of the binary segmentation..
+    split_cost : str
+        The metric to use for calculating the cost.
+
+    Raises
+    ------
+    ValueError
+        If the cost metric provided does not exist this error will be raised.
+
+    Returns
+    -------
+    cost : float
+        The cost for the given split.
+
+    """
     if split_cost == 'mse':
         cost = np.mean((time_series - np.append(split1, split2))**2)
     elif split_cost == 'mae':

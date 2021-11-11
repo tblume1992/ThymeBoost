@@ -134,18 +134,18 @@ class BuildOutput:
             trend = trend_dampen(damp_factor,
                                  trend).values
         future_index = self.handle_future_index(forecast_horizon)
-        predicted_output = pd.DataFrame(predictions,
+        predicted_output = pd.DataFrame(self.scaler_obj(predictions),
                                         index=future_index,
                                         columns=['predictions'])
         bounds = self.get_predicted_intervals(self.time_series,
                                               fitted_output['yhat'],
-                                              predictions,
+                                              self.scaler_obj(predictions),
                                               c=self.c)
         upper_prediction, lower_prediction = bounds
         predicted_output['predicted_trend'] = self.scaler_obj(trend)
         predicted_output['predicted_seasonality'] = self.scaler_obj(seasonality)
         if exogenous is not None:
             predicted_output['predicted_exogenous'] = self.scaler_obj(exogenous)
-        predicted_output['predicted_upper'] = self.scaler_obj(upper_prediction)
-        predicted_output['predicted_lower'] = self.scaler_obj(lower_prediction)
+        predicted_output['predicted_upper'] = upper_prediction
+        predicted_output['predicted_lower'] = lower_prediction
         return predicted_output

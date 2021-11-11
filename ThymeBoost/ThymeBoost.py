@@ -102,7 +102,6 @@ class ThymeBoost:
                  given_splits=None,
                  cost_penalty=.001,
                  normalize_seasonality=True,
-                 additive=True,
                  regularization=1.2,
                  n_rounds=None,
                  smoothed_trend=False,
@@ -110,7 +109,6 @@ class ThymeBoost:
         self.verbose = verbose
         self.n_split_proposals = n_split_proposals
         self.approximate_splits = approximate_splits
-        self.additive = additive
         if exclude_splits is None:
             exclude_splits = []
         self.exclude_splits = exclude_splits
@@ -119,8 +117,6 @@ class ThymeBoost:
         self.given_splits = given_splits
         self.cost_penalty = cost_penalty
         self.scale_type = scale_type
-        if not additive:
-            self.scale_type = 'log'
         self.normalize_seasonality = normalize_seasonality
         self.regularization = regularization
         if n_rounds is None:
@@ -264,15 +260,20 @@ class ThymeBoost:
             beta=None,
             ransac_trials=100,
             ransac_min_samples=10,
-            tree_depth=1):
+            tree_depth=1,
+            additive=True,):
 
         if seasonal_period is None:
             seasonal_period = 0
+        if not additive:
+            self.scale_type = 'log'
         #grab all variables to create 'generator' variables
         _params = locals()
         _params.pop('self', None)
         _params.pop('time_series', None)
+        _params.pop('additive', None)
         _params = {k: ThymeBoost.create_iterated_features(v) for k, v in _params.items()}
+        _params['additive'] = additive
         time_series = pd.Series(time_series)
         self.time_series_index = time_series.index
         self.time_series = time_series.values
@@ -290,14 +291,13 @@ class ThymeBoost:
                                    regularization=self.regularization,
                                    n_rounds=self.n_rounds,
                                    smoothed_trend=self.smoothed_trend,
-                                   additive=self.additive,
                                    **_params)
         booster_results = self.booster_obj.boost()
         fitted_trend = booster_results[0]
         fitted_seasonality = booster_results[1]
         fitted_exogenous = booster_results[2]
         self.c = self.booster_obj.c
-        self.builder = build_output.BuildOutput(self.time_series,
+        self.builder = build_output.BuildOutput(time_series,
                                                 self.time_series_index,
                                                 self.unscale_input,
                                                 self.c)
@@ -434,23 +434,127 @@ class ThymeBoost:
         """
         time_series = pd.Series(time_series)
         self.time_series = time_series
-        optimizer = Optimizer(self,
-                              time_series,
-                              optimization_type,
-                              optimization_strategy,
-                              optimization_steps,
-                              lag,
-                              optimization_metric,
-                              test_set,
-                              verbose,
-                              **kwargs)
-        optimized = optimizer.optimize()
-        self.optimized_params = optimizer.run_settings
+        self.optimizer = Optimizer(self,
+                                   time_series,
+                                   optimization_type,
+                                   optimization_strategy,
+                                   optimization_steps,
+                                   lag,
+                                   optimization_metric,
+                                   test_set,
+                                   verbose,
+                                   **kwargs)
+        optimized = self.optimizer.optimize()
+        self.optimized_params = self.optimizer.run_settings
+        return optimized
+
+    def autofit(self,
+                 time_series,
+                 seasonal_period=[0],
+                 optimization_type='grid_search',
+                 optimization_strategy='rolling',
+                 optimization_steps=3,
+                 lag=2,
+                 optimization_metric='smape',
+                 test_set='all',
+                 verbose=1):
+        """
+        Grid search lazily through predefined search space in order to find the 
+        params which result in the 'best' forecast depending on the given 
+        optimization parameters.
+
+        Parameters
+        ----------
+        time_series : pd.Series
+            The time series.
+        optimization_type : str, optional
+            How to search the space, only 'grid_search' is implemented. 
+            TODO: add bayesian optimization.
+            The default is 'grid_search'.
+        optimization_strategy : str, optional
+            The strategy emplyed when determing the 'best' params. The options
+            are ['rolling', 'holdout'] where rolling uses a cross validation 
+            strategy to 'roll' through the test set. Holdout simply hold out 
+            the last 'lag' data points for testing.
+            The default is 'rolling'.
+        optimization_steps : int, optional
+            When performing 'rolling' optimization_strategy the number of steps
+            to test on. The default is 3.
+        lag : int, optional
+            How many data points to use as the test set. When using 'rolling',
+            this parameter and optimization_steps determines the total number of
+            testing points. Fore example, a lag of 2 with 3 steps means 3 * 2
+            or 6 total points.  In step one we holdout the last 6 and test only 
+            using the first 3 periods of the test set. In step two we include 
+            the last step's test set in the train to test the final 3 periods.
+            The default is 2.
+        optimization_metric : str, optional
+            The metric to judge the test forecast by. Options are :
+            ['smape', 'mape', 'mse', 'mae'].
+            The default is 'smape'.
+        test_set : TYPE, optional
+            DESCRIPTION. The default is 'all'.
+        verbose : TYPE, optional
+            DESCRIPTION. The default is 1.
+
+        Returns
+        -------
+        optimized_params : pd.DataFrame
+            The predicted output dataframe of the optimal parameters.
+
+        """
+        time_series = pd.Series(time_series)
+        self.time_series = time_series
+        if isinstance(seasonal_period, list):
+            generator_seasonality = True
+        else:
+            generator_seasonality = False
+        if generator_seasonality:
+            max_seasonal_pulse = seasonal_period[0]
+        else:
+            max_seasonal_pulse = seasonal_period
+        if not generator_seasonality:
+            seasonal_period = [seasonal_period]
+        if seasonal_period[0]:
+            seasonal_period = [0, seasonal_period, seasonal_period.append(0)]
+
+        _contains_zero = not (time_series > 0).all()
+        if _contains_zero:
+            additive = [True]
+        else:
+            additive = [True, False]
+
+        param_dict = {'trend_estimator': ['linear', 'mean', ['linear', 'mean']],
+                      'seasonal_estimator': ['fourier'],
+                      'seasonal_period': seasonal_period,
+                      'fit_type': ['global', 'local'],
+                      'connectivity_constraint': [True, False],
+                      'global_cost': ['maicc', 'mse'],
+                      'additive': additive
+                      }
+        if len(time_series) > 2 * max_seasonal_pulse and max_seasonal_pulse:
+            seasonality_weights = np.ones(len(time_series))
+            seasonality_weights[(-2 * max_seasonal_pulse):] = 5
+            basic_weights = np.ones(len(time_series))
+            param_dict['seasonality_weights'] = [basic_weights,
+                                                 seasonality_weights]
+        self.optimizer = Optimizer(self,
+                                   time_series,
+                                   optimization_type,
+                                  optimization_strategy,
+                                  optimization_steps,
+                                  lag,
+                                  optimization_metric,
+                                  test_set,
+                                  verbose,
+                                  **param_dict)
+        optimized = self.optimizer.optimize()
+        self.optimized_params = self.optimizer.run_settings
         return optimized
 
     def ensemble(self,
                  time_series,
-                 verbose=1,
+                 verbose=0,
                  **kwargs):
         """
         Perform ensembling aka a simple average of each combination of inputs.
@@ -475,11 +579,11 @@ class ThymeBoost:
             The predicted output dataframe fro mthe ensembled params.
 
         """
-        ensembler = Ensemble(model_object=self,
-                             y=time_series,
-                             verbose=verbose,
-                             **kwargs)
-        output, ensemble_params = ensembler.ensemble_fit()
+        self.ensembler = Ensemble(model_object=self,
+                                  y=time_series,
+                                  verbose=verbose,
+                                  **kwargs)
+        output, ensemble_params = self.ensembler.ensemble_fit()
         self.ensemble_boosters = ensemble_params
         return output
 
@@ -567,196 +671,5 @@ class ThymeBoost:
 
         """
         plotting.plot_components(fitted, predicted, figsize)
-
-
-if __name__ == '__main__':
-    #Some Examples
-    import numpy as np
-    import matplotlib.pyplot as plt
-    
-    
-    #Here we will just create a random series with seasonality and a slight trend
-    seasonality = ((np.cos(np.arange(1, 101))*10 + 50))
-    np.random.seed(100)
-    true = np.linspace(-1, 1, 100)
-    noise = np.random.normal(0, 1, 100)
-    y = true + noise + seasonality
-    plt.plot(y)
-    plt.show()
-
-
-    boosted_model = ThymeBoost(
-                                approximate_splits=True,
-                                n_split_proposals=25,
-                                verbose=1,
-                                cost_penalty=.001,
-                                )
-    
-    output = boosted_model.fit(y,
-                               trend_estimator='linear',
-                               seasonal_estimator='fourier',
-                               seasonal_period=25,
-                               split_cost='mse',
-                               global_cost='maicc',
-                               fit_type='global')
-
-
-    boosted_model.plot_results(output)
-    boosted_model.plot_components(output)
-
-    true = np.linspace(1, 50, 100)
-    noise = np.random.normal(0, 1, 100)
-    y = np.append(y, true + noise + seasonality)
-    plt.plot(y)
-    plt.show()
-    boosted_model = ThymeBoost(
-                                approximate_splits=True,
-                                n_split_proposals=25,
-                                verbose=1,
-                                cost_penalty=.001,
-                                )
-    
-    output = boosted_model.fit(y,
-                               trend_estimator='linear',
-                               seasonal_estimator='fourier',
-                               seasonal_period=25,
-                               split_cost='mse',
-                               global_cost='maicc',
-                               fit_type='local')
-
-    predicted_output = boosted_model.predict(output, 100)
-    boosted_model.plot_results(output, predicted_output)
-    boosted_model.plot_components(output)
-
-    #Pretty complicated model with complex seasonality
-    true = np.linspace(1, 20, 100) + 100
-    noise = np.random.normal(0, 1, 100)
-    y = np.append(y, true + noise + seasonality)
-
-
-    boosted_model = ThymeBoost(
-                                approximate_splits=True,
-                                verbose=1,
-                                cost_penalty=.001,
-                                )
-    
-    output = boosted_model.fit(y,
-                               trend_estimator=['mean'] + ['linear']*20,
-                               seasonal_estimator='fourier',
-                               seasonal_period=[25, 0],
-                               split_cost='mae',
-                               global_cost='maicc',
-                               fit_type='local',
-                               connectivity_constraint=True,
-                               )
-    predicted_output = boosted_model.predict(output, 100)
-    boosted_model.plot_results(output, predicted_output)
-    boosted_model.plot_components(output)
-
-    #Without connectivity constraint
-    boosted_model = ThymeBoost(
-                                approximate_splits=True,
-                                verbose=1,
-                                cost_penalty=.001,
-                                )
-    
-    output = boosted_model.fit(y,
-                               trend_estimator='linear',
-                               seasonal_estimator='fourier',
-                               seasonal_period=[25, 0],
-                               split_cost='mae',
-                               global_cost='maicc',
-                               fit_type='local',
-                               connectivity_constraint=False,
-                               )
-    predicted_output = boosted_model.predict(output, 100)
-    boosted_model.plot_results(output, predicted_output)
-    boosted_model.plot_components(output)
-
-
-    #Without connectivity constraint and increased regularization term
-    boosted_model = ThymeBoost(
-                                approximate_splits=True,
-                                verbose=1,
-                                cost_penalty=.001,
-                                regularization=2.0,
-                                )
-    
-    output = boosted_model.fit(y,
-                               trend_estimator='linear',
-                               seasonal_estimator='fourier',
-                               seasonal_period=[25, 0],
-                               split_cost='mae',
-                               global_cost='maicc',
-                               fit_type='local',
-                               connectivity_constraint=False,
-                               )
-    predicted_output = boosted_model.predict(output, 100)
-    boosted_model.plot_results(output, predicted_output)
-    boosted_model.plot_components(output)
-
-    #n_rounds=1
-    boosted_model = ThymeBoost(
-                                approximate_splits=True,
-                                verbose=1,
-                                cost_penalty=.001,
-                                n_rounds=1
-                                )
-    
-    output = boosted_model.fit(y,
-                               trend_estimator='arima',
-                               arima_order=(1, 0, 1),
-                               seasonal_estimator='fourier',
-                               seasonal_period=[25, 0],
-                               split_cost='mae',
-                               global_cost='maicc',
-                               fit_type='global',
-                               )
-    predicted_output = boosted_model.predict(output, 100)
-    boosted_model.plot_results(output, predicted_output)
-    boosted_model.plot_components(output)
-
-    #n_rounds=2
-    boosted_model = ThymeBoost(
-                                approximate_splits=True,
-                                verbose=1,
-                                cost_penalty=.001,
-                                n_rounds=2
-                                )
-    
-    output = boosted_model.fit(y,
-                               trend_estimator='arima',
-                               arima_order=(1, 0, 1),
-                               seasonal_estimator='fourier',
-                               seasonal_period=[25, 0],
-                               split_cost='mae',
-                               global_cost='maicc',
-                               fit_type='global',
-                               )
-    predicted_output = boosted_model.predict(output, 100)
-    boosted_model.plot_results(output, predicted_output)
-    boosted_model.plot_components(output)
-
-    #seasonality regularization
-    boosted_model = ThymeBoost(
-                                approximate_splits=True,
-                                verbose=1,
-                                cost_penalty=.001,
-                                n_rounds=2
-                                )
-    
-    output = boosted_model.fit(y,
-                               trend_estimator='arima',
-                               arima_order=(1, 0, 1),
-                               seasonal_estimator='fourier',
-                               seasonal_period=[25, 0],
-                               split_cost='mae',
-                               global_cost='maicc',
-                               fit_type='global',
-                               seasonality_lr=.1
-                               )
-    predicted_output = boosted_model.predict(output, 100)
-    boosted_model.plot_results(output, predicted_output)
-    boosted_model.plot_components(output)
 
 

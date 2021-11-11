@@ -94,7 +94,7 @@ class Optimizer(ParamIterator):
 
     def fit(self):
         #This needs to be refactored
-        parameters = self.get_search_space()
+        self.parameters = self.get_search_space()
         self.set_optimization_metric()
         results = {}
         for num_steps in range(1, self.optimization_steps + 1):
@@ -103,9 +103,9 @@ class Optimizer(ParamIterator):
             test_y = test_y[:self.lag]
             results[str(num_steps)] = {}
             if self.verbose:
-                param_iters = tqdm(parameters)
+                param_iters = tqdm(self.parameters)
             else:
-                param_iters = parameters
+                param_iters = self.parameters
             for settings in param_iters:
                 # try:
                     run_settings = copy.deepcopy(settings)

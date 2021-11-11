@@ -35,7 +35,7 @@ class FitSeasonality:
     def fit_seasonal_component(self, detrended):
         data_len = len(detrended)
         if not self.seasonal_period:
-            seasonality = np.zeros(data_len) + (not self.additive)
+            seasonality = np.zeros(data_len)
             self.model_params = None
             self.model_obj = None
         else:

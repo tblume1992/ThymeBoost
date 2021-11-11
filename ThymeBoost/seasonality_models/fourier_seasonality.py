@@ -25,7 +25,10 @@ class FourierSeasonalityModel(SeasonalityBaseModel):
 
     def handle_seasonal_weights(self, y):
         if self.seasonality_weights is None:
-            seasonality_weights = self.seasonality_weights
+            seasonality_weights = None
+        elif isinstance(self.seasonality_weights, list):
+            if self.seasonal_weights[0] is None:
+                seasonality_weights = None
         elif self.seasonality_weights == 'regularize':
             seasonality_weights = 1/(0.0001 + y**2)
         elif self.seasonality_weights == 'explode':
@@ -33,7 +36,8 @@ class FourierSeasonalityModel(SeasonalityBaseModel):
         elif callable(self.seasonality_weights):
             seasonality_weights = self.seasonality_weights(y)
         else:
-            seasonality_weights = self.seasonality_weights
+            seasonality_weights = np.array(self.seasonality_weights).reshape(-1,)
+            seasonality_weights = seasonality_weights[:len(y)]
         return seasonality_weights
 
     def get_fourier_series(self, t, fourier_order):
