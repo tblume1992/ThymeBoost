@@ -26,7 +26,7 @@ class booster(Decompose):
                  smoothed_trend,
                  additive,
                  **kwargs):
-        time_series = pd.Series(time_series)
+        time_series = pd.Series(time_series).copy(deep=True)
         self.time_series_index = time_series.index
         self.time_series = time_series.values
         self.boosted_data = self.time_series

@@ -265,7 +265,9 @@ class ThymeBoost:
 
         if seasonal_period is None:
             seasonal_period = 0
-        if not additive:
+        if additive:
+            self.scale_type = None
+        else:
             self.scale_type = 'log'
         #grab all variables to create 'generator' variables
         _params = locals()
@@ -274,7 +276,7 @@ class ThymeBoost:
         _params.pop('additive', None)
         _params = {k: ThymeBoost.create_iterated_features(v) for k, v in _params.items()}
         _params['additive'] = additive
-        time_series = pd.Series(time_series)
+        time_series = pd.Series(time_series).copy(deep=True)
         self.time_series_index = time_series.index
         self.time_series = time_series.values
         assert not all([i == 0 for i in time_series]), 'All inputs are 0'
@@ -432,7 +434,7 @@ class ThymeBoost:
             The predicted output dataframe of the optimal parameters.
 
         """
-        time_series = pd.Series(time_series)
+        time_series = pd.Series(time_series).copy(deep=True)
         self.time_series = time_series
         self.optimizer = Optimizer(self,
                                    time_series,
@@ -503,7 +505,7 @@ class ThymeBoost:
             The predicted output dataframe of the optimal parameters.
 
         """
-        time_series = pd.Series(time_series)
+        time_series = pd.Series(time_series).copy(deep=True)
         self.time_series = time_series
         if isinstance(seasonal_period, list):
             generator_seasonality = True
@@ -541,13 +543,13 @@ class ThymeBoost:
         self.optimizer = Optimizer(self,
                                    time_series,
                                    optimization_type,
-                                  optimization_strategy,
-                                  optimization_steps,
-                                  lag,
-                                  optimization_metric,
-                                  test_set,
-                                  verbose,
-                                  **param_dict)
+                                   optimization_strategy,
+                                   optimization_steps,
+                                   lag,
+                                   optimization_metric,
+                                   test_set,
+                                   verbose,
+                                   **param_dict)
         optimized = self.optimizer.optimize()
         self.optimized_params = self.optimizer.run_settings
         return optimized
@@ -579,6 +581,7 @@ class ThymeBoost:
             The predicted output dataframe fro mthe ensembled params.
 
         """
+        time_series = pd.Series(time_series).copy(deep=True)
         self.ensembler = Ensemble(model_object=self,
                                   y=time_series,
                                   verbose=verbose,

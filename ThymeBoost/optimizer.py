@@ -98,8 +98,9 @@ class Optimizer(ParamIterator):
         self.set_optimization_metric()
         results = {}
         for num_steps in range(1, self.optimization_steps + 1):
-            test_y = self.y[-self.lag - num_steps + 1:]
-            train_y = self.y[:-self.lag - num_steps + 1]
+            y_copy = self.y.copy(deep=True)
+            test_y = y_copy[-self.lag - num_steps + 1:]
+            train_y = y_copy[:-self.lag - num_steps + 1]
             test_y = test_y[:self.lag]
             results[str(num_steps)] = {}
             if self.verbose:

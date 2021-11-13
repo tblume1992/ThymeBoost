@@ -39,8 +39,9 @@ class Ensemble(ParamIterator):
             param_iters = parameters
         outputs = []
         for run_settings in param_iters:
+            y_copy = self.y.copy(deep=True)
             try:
-                output = self.model_object.fit(self.y, **run_settings)
+                output = self.model_object.fit(y_copy, **run_settings)
                 #key = ','.join(map(str, run_settings.values()))
                 outputs.append(output)
                 ensemble_parameters.append(self.model_object.booster_obj)
