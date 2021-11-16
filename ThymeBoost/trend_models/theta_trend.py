@@ -4,19 +4,19 @@ import numpy as np
 import pandas as pd
 from scipy import signal
 
-class ButterModel(TrendBaseModel):
-    model = 'butter'
+class ThetaModel(TrendBaseModel):
+    model = 'theta'
     
     def __init__(self):
         self.model_params = None
         self.fitted = None
 
     def __str__(self):
-        return f'{self.model}({self.kwargs["ewm_alpha"]})'
+        return f'{self.model}()'
 
     def fit(self, y, **kwargs):
         """
-        Fit the trend component in the boosting loop for a ewm model using alpha.
+        Fit the trend component in the boosting loop for an optimized theta model.
 
         Parameters
         ----------

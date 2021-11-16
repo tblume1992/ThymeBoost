@@ -77,6 +77,7 @@ def predict_exogenous(booster_obj,
     else:
         exo_model = booster_obj.exo_objs[boosting_round].model_obj
         exo_round = exo_model.predict(future_exo)
+        exo_round = exo_round * booster_obj.exo_class.exogenous_lr
     return exo_round
 
 
