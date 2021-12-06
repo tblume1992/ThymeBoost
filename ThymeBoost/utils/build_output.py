@@ -52,7 +52,11 @@ class BuildOutput:
         lower : TYPE
             DESCRIPTION.
         """
-        sd_error = np.std(y - fitted)
+        n = len(y)
+        # denom = n * np.sum((y - np.mean(y))**2)
+        sd_error = np.sqrt((1 / max(1, (n - 2))) * np.sum((y - np.mean(fitted))**2))
+        # sd_error = np.sqrt(top / denom)
+        # sd_error = np.std(y - fitted)
         t_stat = stats.t.ppf(.9, len(y))
         upper = fitted + t_stat*sd_error
         lower = fitted - t_stat*sd_error

@@ -232,10 +232,14 @@ class ThymeBoost:
             return param_list
         return combiner
 
+    def get_changepoints(self):
+        self.changepoints = [i.split for i in self.booster_obj.trend_objs]
+        return
+
     def fit(self,
             time_series,
             seasonal_period=0,
-            trend_estimator='mean',
+            trend_estimator='linear',
             seasonal_estimator='fourier',
             exogenous_estimator='ols',
             l2=None,
@@ -243,7 +247,7 @@ class ThymeBoost:
             arima_order=(1, 0, 1),
             connectivity_constraint=True,
             fourier_order=10,
-            fit_type='local',
+            fit_type='global',
             window_size=3,
             trend_weights=None,
             seasonality_weights=None,
@@ -252,7 +256,7 @@ class ThymeBoost:
             exogenous_lr=1,
             min_sample_pct=.01,
             split_cost='mse',
-            global_cost='maic',
+            global_cost='maicc',
             exogenous=None,
             damp_factor=None,
             ewm_alpha=.5,
@@ -308,6 +312,7 @@ class ThymeBoost:
                                               fitted_exogenous)
         #ensure we do not fall into ensemble prediction for normal fit
         self.ensemble_boosters = None
+        self.get_changepoints()
         return output
 
     def predict(self,
@@ -526,7 +531,7 @@ class ThymeBoost:
         else:
             additive = [True, False]
 
-        param_dict = {'trend_estimator': ['linear', 'mean', ['linear', 'mean']],
+        param_dict = {'trend_estimator': ['linear', 'mean'],
                       'seasonal_estimator': ['fourier'],
                       'seasonal_period': seasonal_period,
                       'fit_type': ['global', 'local'],
@@ -592,8 +597,8 @@ class ThymeBoost:
 
     def detect_outliers(self,
                         time_series,
-                        trend_estimator='ransac',
-                        fit_type='local',
+                        trend_estimator='linear',
+                        fit_type='global',
                         **kwargs):
         """
         This is an off-the-cuff helper method for outlier detection. 
@@ -674,8 +679,3 @@ class ThymeBoost:
 
         """
         plotting.plot_components(fitted, predicted, figsize)
-
-# %%
-
-
-
