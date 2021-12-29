@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import numpy as np
 from sklearn.tree import DecisionTreeRegressor
 from ThymeBoost.exogenous_models.exogenous_base_class import ExogenousBaseModel
 
@@ -20,4 +21,5 @@ class DecisionTree(ExogenousBaseModel):
         return self.fitted
 
     def predict(self, future_exogenous):
+        future_exogenous = np.array(future_exogenous).reshape((-1, 1))
         return self.model_obj.predict(future_exogenous)

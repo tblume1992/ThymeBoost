@@ -86,14 +86,18 @@ class BuildOutput:
             DESCRIPTION.
 
         """
-        sd_error = np.std(y - fitted)
+        n = len(y)
+        # denom = n * np.sum((y - np.mean(y))**2)
+        sd_error = np.sqrt((1 / max(1, (n - 2))) * np.sum((y - np.mean(fitted))**2))
+        # sd_error = np.sqrt(top / denom)
+        # sd_error = np.std(y - fitted)
         t_stat = stats.t.ppf(.9, len(y))
         len_frac = len(predicted)/len(fitted)
         interval_uncertainty_param = np.linspace(1.0,
                                                  1.0 + 3*len_frac,
                                                  len(predicted))
-        upper = predicted + t_stat*sd_error*interval_uncertainty_param
-        lower = predicted - t_stat*sd_error*interval_uncertainty_param
+        upper = predicted + t_stat*sd_error#*interval_uncertainty_param
+        lower = predicted - t_stat*sd_error#*interval_uncertainty_param
         return upper, lower
 
     def build_fitted_df(self,
@@ -107,16 +111,16 @@ class BuildOutput:
         yhat = trend + seasonality
         if exogenous is not None:
             yhat += exogenous
-        upper_fitted, lower_fitted = self.get_fitted_intervals(self.time_series,
-                                                               yhat,
+        upper_fitted, lower_fitted = self.get_fitted_intervals(self.scaler_obj(self.time_series),
+                                                               self.scaler_obj(yhat),
                                                                c=self.c)
         if exogenous is not None:
             output['exogenous'] = exogenous
             # output['Exogenous Summary'] = self.get_boosted_exo_results(exo_impact)
             # self.exo_impact = exo_impact
         output['yhat'] = self.scaler_obj(yhat)
-        output['yhat_upper'] = self.scaler_obj(upper_fitted)
-        output['yhat_lower'] = self.scaler_obj(lower_fitted)
+        output['yhat_upper'] = upper_fitted
+        output['yhat_lower'] = lower_fitted
         output['seasonality'] = self.scaler_obj(seasonality)
         output['trend'] = self.scaler_obj(trend)
         return output
@@ -138,13 +142,13 @@ class BuildOutput:
             trend = trend_dampen(damp_factor,
                                  trend).values
         future_index = self.handle_future_index(forecast_horizon)
-        predicted_output = pd.DataFrame(self.scaler_obj(predictions),
-                                        index=future_index,
-                                        columns=['predictions'])
-        bounds = self.get_predicted_intervals(self.time_series,
+        bounds = self.get_predicted_intervals(self.scaler_obj(self.time_series),
                                               fitted_output['yhat'],
                                               self.scaler_obj(predictions),
                                               c=self.c)
+        predicted_output = pd.DataFrame(self.scaler_obj(predictions),
+                                        index=future_index,
+                                        columns=['predictions'])
         upper_prediction, lower_prediction = bounds
         predicted_output['predicted_trend'] = self.scaler_obj(trend)
         predicted_output['predicted_seasonality'] = self.scaler_obj(seasonality)

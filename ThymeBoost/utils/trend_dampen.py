@@ -22,4 +22,6 @@ def trend_dampen(damp_fact, trend):
             crossing_point = crossing[0]
             avg_grad = (np.mean(np.gradient(zeroed_trend))*dampened_trend)
             dampened_trend[crossing_point:] = dampened_trend[avg_grad.idxmax()]
-    return dampened_trend + trend[0]
+    #TODO random fix for array/series confusion
+    dampened_trend = pd.Series(dampened_trend)
+    return dampened_trend.values + trend[0]

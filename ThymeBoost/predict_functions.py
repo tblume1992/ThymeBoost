@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+import pandas as pd
+from ThymeBoost.utils import trend_dampen
 
 
-def predict_trend(booster_obj, boosting_round, forecast_horizon):
+def predict_trend(booster_obj, boosting_round, forecast_horizon, trend_penalty):
     """
     Predict the trend component using the booster
 
@@ -23,6 +25,11 @@ def predict_trend(booster_obj, boosting_round, forecast_horizon):
     trend_param = booster_obj.trend_pred_params[boosting_round]
     trend_model = booster_obj.trend_objs[boosting_round].model_obj
     trend_round = trend_model.predict(forecast_horizon, trend_param)
+    if trend_penalty:
+        avg_slope = np.mean(np.gradient(trend_round))
+        if avg_slope != 0:
+            penalty = booster_obj.trend_strengths[boosting_round]
+            trend_round = trend_dampen.trend_dampen(1-penalty, trend_round)
     return trend_round
 
 
@@ -83,6 +90,7 @@ def predict_exogenous(booster_obj,
 
 def predict_rounds(booster_obj,
                    forecast_horizon,
+                   trend_penalty,
                    future_exo=None):
     """
     Predict all the rounds from a booster
@@ -110,7 +118,8 @@ def predict_rounds(booster_obj,
     for boosting_round in range(booster_obj.i):
         trend_predictions += predict_trend(booster_obj,
                                            boosting_round,
-                                           forecast_horizon)
+                                           forecast_horizon,
+                                           trend_penalty)
         seasonal_predictions += predict_seasonality(booster_obj,
                                                     boosting_round,
                                                     forecast_horizon)

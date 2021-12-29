@@ -28,5 +28,6 @@ class FitExogenous:
 
     def fit_exogenous_component(self, time_residual, exogenous):
         self.model_obj = self.set_estimator(self.exo_estimator)()
+        exogenous = np.array(exogenous).reshape((-1, 1))
         exo_fitted = self.model_obj.fit(time_residual, exogenous, **self.kwargs)
         return self.exogenous_lr*np.array(exo_fitted)

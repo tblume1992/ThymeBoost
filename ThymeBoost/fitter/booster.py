@@ -58,6 +58,7 @@ class booster(Decompose):
         self.errors = []
         self.fitted_exogenous = []
         self.exo_class = None
+        self.trend_strengths = []
 
     def update_params(self,
                       total_trend,
@@ -68,12 +69,17 @@ class booster(Decompose):
         self.trend_pred_params.append(self.trend_obj.model_params)
         self.trend_objs.append(self.trend_obj)
         self.exo_objs.append(self.exo_class)
+        self.trend_strengths.append(self.trend_strength)
         self.total_trend = total_trend
         self.total_seasonalities = total_seasonal
         if self.boosting_params['exogenous'] is None:
             self.total_fitted_exogenous = None
         else:
             self.total_fitted_exogenous = total_exo
+
+    @staticmethod
+    def calc_trend_strength(resids, deseasonalized):
+        return max(0, 1-(np.var(resids)/np.var(deseasonalized)))
 
     def boost(self):
         self.initialize_booster_values()
@@ -84,6 +90,9 @@ class booster(Decompose):
                 break
             round_results = self.additive_boost_round(self.i)
             current_prediction, total_trend, total_seasonal, total_exo = round_results
+            resids = self.time_series - current_prediction
+            self.trend_strength = booster.calc_trend_strength(resids,
+                                                              resids + total_trend)
             self.c = get_complexity(self.i,
                                     self.boosting_params['poly'],
                                     self.boosting_params['fit_type'],

@@ -4,7 +4,7 @@ ThymeBoost combines time series decomposition with gradient boosting to
 provide a flexible mix-and-match time series framework. At the most granular 
 level are the trend/level (going forward this is just referred to as 'trend') 
 models, seasonal models,  and edogenous models. These are used to approximate 
-the respective components at each 'boosting round' and concurrent rounds are 
+the respective components at each 'boosting round'. Concurrent rounds are 
 fit on residuals in usual boosting fashion.
 
 The boosting procedure is heavily influenced by traditional boosting theory [1]_ 
@@ -275,6 +275,7 @@ class ThymeBoost:
             self.scale_type = 'log'
         #grab all variables to create 'generator' variables
         _params = locals()
+        self._params = _params
         _params.pop('self', None)
         _params.pop('time_series', None)
         _params.pop('additive', None)
@@ -320,7 +321,8 @@ class ThymeBoost:
                 forecast_horizon,
                 future_exogenous=None,
                 damp_factor=None,
-                trend_cap_target=None) -> pd.DataFrame:
+                trend_cap_target=None,
+                trend_penalty=None) -> pd.DataFrame:
         """
         ThymeBoost predict method which uses the booster to generate 
         predictions that are a sum of each component's round.
@@ -351,7 +353,9 @@ class ThymeBoost:
         if self.ensemble_boosters is None:
             trend, seas, exo, predictions = predict_rounds(self.booster_obj,
                                                            forecast_horizon,
-                                                           future_exogenous)
+                                                           trend_penalty,
+                                                           future_exogenous,
+                                                           )
             fitted_output = copy.deepcopy(fitted_output)
             predicted_output = self.builder.build_predicted_df(fitted_output,
                                                                forecast_horizon,
@@ -367,7 +371,9 @@ class ThymeBoost:
                 self.booster_obj = booster_obj
                 trend, seas, exo, predictions = predict_rounds(self.booster_obj,
                                                                forecast_horizon,
-                                                               future_exogenous)
+                                                               trend_penalty,
+                                                               future_exogenous,
+                                                               )
                 fitted_output = copy.deepcopy(fitted_output)
                 predicted_output = self.builder.build_predicted_df(fitted_output,
                                                                    forecast_horizon,
@@ -529,14 +535,13 @@ class ThymeBoost:
         if _contains_zero:
             additive = [True]
         else:
-            additive = [True, False]
+            additive = [False]
 
-        param_dict = {'trend_estimator': ['linear', 'mean'],
+        param_dict = {'trend_estimator': ['linear', ['linear', 'ses'], 'ses'],
                       'seasonal_estimator': ['fourier'],
                       'seasonal_period': seasonal_period,
-                      'fit_type': ['global', 'local'],
-                      'connectivity_constraint': [True, False],
-                      'global_cost': ['maicc', 'mse'],
+                      'fit_type': ['global'],
+                      'global_cost': ['mse', 'maicc'],
                       'additive': additive
                       }
         if len(time_series) > 2 * max_seasonal_pulse and max_seasonal_pulse:
@@ -558,6 +563,44 @@ class ThymeBoost:
         optimized = self.optimizer.optimize()
         self.optimized_params = self.optimizer.run_settings
         return optimized
+
+    def update(self,
+               output,
+               new_input
+               ):
+        """
+        Experimental feature to do online learning.
+        TODO : fix bound issue
+
+        Parameters
+        ----------
+        output : pd.DataFrame
+            Output from fit method.
+        new_input : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        full_output : TYPE
+            DESCRIPTION.
+
+        """
+        predictions = self.predict(output, len(new_input))
+        update_series = output['y'] - output['yhat']
+        update_series = update_series.append(new_input - predictions['predictions'])
+        updated_output = self.fit(update_series, **self._params)
+        predictions.columns = ['yhat',
+                               'trend',
+                               'seasonality',
+                               'exogenous',
+                               'yhat_upper',
+                               'yhat_lower'
+                                ]
+        predictions['y'] = new_input
+        predictions = predictions[output.columns]
+        full_output = output.append(predictions)
+        full_output = full_output + updated_output
+        return full_output
 
     def ensemble(self,
                  time_series,
@@ -583,7 +626,7 @@ class ThymeBoost:
         Returns
         -------
         output : : pd.DataFrame
-            The predicted output dataframe fro mthe ensembled params.
+            The predicted output dataframe from the ensembled params.
 
         """
         time_series = pd.Series(time_series).copy(deep=True)
@@ -679,3 +722,4 @@ class ThymeBoost:
 
         """
         plotting.plot_components(fitted, predicted, figsize)
+

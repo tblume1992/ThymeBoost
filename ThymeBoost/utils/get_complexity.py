@@ -28,5 +28,9 @@ def get_complexity(boosting_round,
         if trend_estimator == 'linear' and fit_type == 'local':
             c = poly + fourier_order + boosting_round
         if exogenous is not None:
-            c += np.shape(exogenous)[1]
+            input_shape = np.shape(exogenous)
+            if len(input_shape) == 1:
+                c += 1
+            else:
+                c += input_shape[1]
     return c
