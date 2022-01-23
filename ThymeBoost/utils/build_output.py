@@ -63,7 +63,7 @@ class BuildOutput:
         return upper, lower
 
     @staticmethod
-    def get_predicted_intervals(y, fitted, predicted, c):
+    def get_predicted_intervals(y, fitted, predicted, c, uncertainty):
         """
         A interval calculation based on linear regression with forecast penalty,
         only semi-useful for non-smoother/state space/local models.
@@ -93,11 +93,14 @@ class BuildOutput:
         # sd_error = np.std(y - fitted)
         t_stat = stats.t.ppf(.9, len(y))
         len_frac = len(predicted)/len(fitted)
-        interval_uncertainty_param = np.linspace(1.0,
-                                                 1.0 + 3*len_frac,
-                                                 len(predicted))
-        upper = predicted + t_stat*sd_error#*interval_uncertainty_param
-        lower = predicted - t_stat*sd_error#*interval_uncertainty_param
+        if uncertainty:
+            interval_uncertainty_param = np.linspace(1.0,
+                                                     1.0 + 3*len_frac,
+                                                     len(predicted))
+        else:
+            interval_uncertainty_param = np.ones(len(predicted))
+        upper = predicted + t_stat*sd_error*interval_uncertainty_param
+        lower = predicted - t_stat*sd_error*interval_uncertainty_param
         return upper, lower
 
     def build_fitted_df(self,
@@ -133,7 +136,9 @@ class BuildOutput:
                            exogenous,
                            predictions,
                            trend_cap_target,
-                           damp_factor):
+                           damp_factor,
+                           uncertainty
+                           ):
         if trend_cap_target is not None:
             predicted_trend_perc = (trend[-1] - trend[0]) / trend[0]
             trend_change = trend_cap_target / predicted_trend_perc
@@ -145,7 +150,8 @@ class BuildOutput:
         bounds = self.get_predicted_intervals(self.scaler_obj(self.time_series),
                                               fitted_output['yhat'],
                                               self.scaler_obj(predictions),
-                                              c=self.c)
+                                              c=self.c,
+                                              uncertainty=uncertainty)
         predicted_output = pd.DataFrame(self.scaler_obj(predictions),
                                         index=future_index,
                                         columns=['predictions'])

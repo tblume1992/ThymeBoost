@@ -57,13 +57,13 @@ class ParamIterator:
             params['window_size'] = None
         if 'fourier' not in v and 'fourier_order' in k:
             params['fourier_order'] = None
-        if 'arima' not in v and 'arima_order' in k:
+        if 'arima' not in str(v) and 'arima_order' in k:
             params['arima_order'] = None
         if 'decision_tree' not in v and 'tree_depth' in k:
             params['tree_depth'] = None
-        if 'local' in v and ('loess' in v or 'ewm' in v or 'ses' in v or 'des'
-                             in v or 'damped_des' in v or 'arima' in v):
-            params['fit_type'] = 'global'
+        # if 'local' in v and ('loess' in v or 'ewm' in v or 'ses' in v or 'des'
+        #                      in v or 'damped_des' in v or 'arima' in v):
+        #     params['fit_type'] = 'global'
         params['exogenous'] = exogenous
         return params
 

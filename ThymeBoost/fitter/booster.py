@@ -81,6 +81,23 @@ class booster(Decompose):
     def calc_trend_strength(resids, deseasonalized):
         return max(0, 1-(np.var(resids)/np.var(deseasonalized)))
 
+    def boosting_log(self, round_cost):
+        #quick printing
+        #TODO replace with logging
+            print(f'''{"*"*10} Round {self.i+1} {"*"*10}''')
+            print(f'''Using Split: {self.split}''')
+            if self.i == 0:
+                print(f'''Fitting initial trend globally with trend model:''')
+            else:
+                print(f'''Fitting {self.trend_objs[-1].fit_type} with trend model:''')
+            print(f'''{str(self.trend_objs[-1].model_obj)}''')
+            print(f'''seasonal model:''')
+            print(f'''{str(self.seasonal_objs[-1].model_obj)}''')
+            if self.exo_class is not None:
+                print(f'''exogenous model:''')
+                print(f'''{str(self.exo_objs[-1].model_obj)}''')
+            print(f'''cost: {round_cost}''')
+
     def boost(self):
         self.initialize_booster_values()
         __boost = True
@@ -121,21 +138,7 @@ class booster(Decompose):
                                    total_seasonal,
                                    total_exo)
                 if self.verbose:
-                #quick printing
-                #TODO replace with logging
-                    print(f'''{"*"*10} Round {self.i+1} {"*"*10}''')
-                    print(f'''Using Split: {self.split}''')
-                    if self.i == 0:
-                        print(f'''Fitting initial trend globally with trend model:''')
-                    else:
-                        print(f'''Fitting {self.boosting_params['fit_type']} with trend model:''')
-                    print(f'''{str(self.trend_objs[-1].model_obj)}''')
-                    print(f'''seasonal model:''')
-                    print(f'''{str(self.seasonal_objs[-1].model_obj)}''')
-                    if self.exo_class is not None:
-                        print(f'''exogenous model:''')
-                        print(f'''{str(self.exo_objs[-1].model_obj)}''')
-                    print(f'''cost: {round_cost}''')
+                    self.boosting_log(round_cost)
             else:
                 assert self.i > 0, 'Boosting terminated before beginning'
                 __boost = False

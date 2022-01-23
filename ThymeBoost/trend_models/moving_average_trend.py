@@ -2,21 +2,20 @@
 from ThymeBoost.trend_models.trend_base_class import TrendBaseModel
 import numpy as np
 import pandas as pd
-from statsmodels.tsa.forecasting.theta import ThetaModel
 
-class ThetaModel(TrendBaseModel):
-    model = 'theta'
+class MovingAverageModel(TrendBaseModel):
+    model = 'moving_average'
     
     def __init__(self):
         self.model_params = None
         self.fitted = None
 
     def __str__(self):
-        return f'{self.model}()'
+        return f'{self.model}({self.kwargs["window_size"]})'
 
     def fit(self, y, **kwargs):
         """
-        Fit the trend component in the boosting loop for an optimized theta model.
+        Fit the trend component in the boosting loop for a ewm model using alpha.
 
         Parameters
         ----------
@@ -31,11 +30,10 @@ class ThetaModel(TrendBaseModel):
 
         """
         self.kwargs = kwargs
+        window = kwargs['window_size']
         bias = kwargs['bias']
-        y -= bias
-        theta_model = ThetaModel(y, method="additive", period=1) + bias
-        fitted = theta_model.fit()
-        self.fitted = theta_model
+        y = pd.Series(y - bias)
+        self.fitted = np.array(y.rolling(window).mean().fillna(method='backfill')) + bias
         last_fitted_values = self.fitted[-1]
         self.model_params = last_fitted_values
         return self.fitted

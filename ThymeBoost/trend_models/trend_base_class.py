@@ -73,3 +73,21 @@ class TrendBaseModel(ABC):
 
     def __str__(cls):
         return f'{cls.model} model'
+
+    def get_frequency(self, index):
+        if len(index) > 2:
+            freq = pd.infer_freq(index)
+        elif len(index) == 2:
+            time_delta = (index[-1] - index[0]).days
+            if time_delta > 2 and time_delta < 20:
+                freq = 'W'
+            elif time_delta < 2:
+                freq = 'D'
+            elif time_delta > 20 and time_delta < 40:
+                freq = 'M'
+            elif time_delta > 300:
+                freq = 'Y'
+        else:
+            #safe setting to month
+            freq = 'M'
+        return freq

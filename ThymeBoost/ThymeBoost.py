@@ -105,7 +105,8 @@ class ThymeBoost:
                  regularization=1.2,
                  n_rounds=None,
                  smoothed_trend=False,
-                 scale_type=None):
+                 scale_type=None,
+                 error_handle='raise'):
         self.verbose = verbose
         self.n_split_proposals = n_split_proposals
         self.approximate_splits = approximate_splits
@@ -125,6 +126,7 @@ class ThymeBoost:
         self.smoothed_trend = smoothed_trend
         self.trend_cap_target = None
         self.ensemble_boosters = None
+        self.error_handle = error_handle
 
     def scale_input(self, time_series):
         """
@@ -155,9 +157,18 @@ class ThymeBoost:
             time_series = (time_series - self.time_series_mean) / \
                            self.time_series_std
         elif self.scale_type == 'log':
-            assert time_series.all(), 'Series can not contain 0 for mult. fit or log scaling'
-            assert (time_series > 0).all(), 'Series can not contain neg. values for mult. fit or log scaling'
-            time_series = np.log(time_series)
+            if self.error_handle == 'raise':
+                assert time_series.all(), 'Series can not contain 0 for mult. fit or log scaling'
+                assert (time_series > 0).all(), 'Series can not contain neg. values for mult. fit or log scaling'
+                time_series = np.log(time_series)
+            elif self.error_handle == 'warn':
+                if not (time_series > 0).all():
+                    print('Series can not contain neg. values or 0 for multiplicative fit or log scaling')
+                    self.scale_type = None
+            else:
+                if not (time_series > 0).all():
+                    self.scale_type = None
+
         elif self.scale_type is None:
             pass
         else:
@@ -245,6 +256,7 @@ class ThymeBoost:
             l2=None,
             poly=1,
             arima_order=(1, 0, 1),
+            arima_trend=None,
             connectivity_constraint=True,
             fourier_order=10,
             fit_type='global',
@@ -322,7 +334,8 @@ class ThymeBoost:
                 future_exogenous=None,
                 damp_factor=None,
                 trend_cap_target=None,
-                trend_penalty=None) -> pd.DataFrame:
+                trend_penalty=None,
+                uncertainty=True) -> pd.DataFrame:
         """
         ThymeBoost predict method which uses the booster to generate 
         predictions that are a sum of each component's round.
@@ -350,6 +363,7 @@ class ThymeBoost:
         """
         if future_exogenous is not None:
             assert len(future_exogenous) == forecast_horizon, 'Given future exogenous not equal to forecast horizon'
+
         if self.ensemble_boosters is None:
             trend, seas, exo, predictions = predict_rounds(self.booster_obj,
                                                            forecast_horizon,
@@ -364,7 +378,8 @@ class ThymeBoost:
                                                                exo,
                                                                predictions,
                                                                trend_cap_target,
-                                                               damp_factor)
+                                                               damp_factor,
+                                                               uncertainty)
         else:
             ensemble_predictions = []
             for booster_obj in self.ensemble_boosters:
@@ -382,7 +397,8 @@ class ThymeBoost:
                                                                    exo,
                                                                    predictions,
                                                                    trend_cap_target,
-                                                                   damp_factor)
+                                                                   damp_factor,
+                                                                   uncertainty)
                 ensemble_predictions.append(predicted_output)
             predicted_output = pd.concat(ensemble_predictions)
             predicted_output = predicted_output.groupby(predicted_output.index).mean()
@@ -585,7 +601,8 @@ class ThymeBoost:
             DESCRIPTION.
 
         """
-        predictions = self.predict(output, len(new_input))
+        original_booster = self.booster_obj
+        predictions = self.predict(output, len(new_input), uncertainty=False)
         update_series = output['y'] - output['yhat']
         update_series = update_series.append(new_input - predictions['predictions'])
         updated_output = self.fit(update_series, **self._params)
@@ -600,6 +617,7 @@ class ThymeBoost:
         predictions = predictions[output.columns]
         full_output = output.append(predictions)
         full_output = full_output + updated_output
+        self.booster_obj.i = original_booster.i + self.booster_obj.i
         return full_output
 
     def ensemble(self,
@@ -722,4 +740,3 @@ class ThymeBoost:
 
         """
         plotting.plot_components(fitted, predicted, figsize)
-
