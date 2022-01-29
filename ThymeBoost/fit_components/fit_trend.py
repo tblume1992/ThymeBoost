@@ -5,7 +5,8 @@ from ThymeBoost.cost_functions import get_split_cost
 from ThymeBoost.split_proposals import SplitProposals
 from ThymeBoost.trend_models import (linear_trend, mean_trend, median_trend,
                                      loess_trend, ransac_trend, ewm_trend,
-                                     ets_trend, arima_trend, moving_average_trend)
+                                     ets_trend, arima_trend, moving_average_trend,
+                                     zero_trend)
 
 
 class FitTrend:
@@ -139,6 +140,8 @@ class FitTrend:
             fit_obj = ransac_trend.RansacModel
         elif trend_estimator == 'moving_average':
             fit_obj = moving_average_trend.MovingAverageModel
+        elif trend_estimator == 'zero':
+            fit_obj = zero_trend.ZeroModel
         else:
             raise NotImplementedError('That trend estimation is not availale yet, add it to the road map!')
         return fit_obj
