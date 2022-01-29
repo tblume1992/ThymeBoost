@@ -4,6 +4,10 @@ import numpy as np
 import pandas as pd
 
 class EwmModel(TrendBaseModel):
+    """
+    The ewm method utilizes a Pandas ewm method: https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.ewm.html.
+    Fitting this with a 'local' fit_type parameter is not advised.
+    """
     model = 'ewm'
     
     def __init__(self):
@@ -15,18 +19,18 @@ class EwmModel(TrendBaseModel):
 
     def fit(self, y, **kwargs):
         """
-        Fit the trend component in the boosting loop for a ewm model using alpha.
+        Fit the trend component in the boosting loop for a ewm model using the 'ewm_alpha' parameter.
 
         Parameters
         ----------
-        time_series : TYPE
+        time_series : np.ndarray
             DESCRIPTION.
-        **kwargs : TYPE
-            DESCRIPTION.
+        **kwargs : 
+            The key 'ewm_alpha' is passed to this method from the ThymeBoost fit method.
 
         Returns
         -------
-        None.
+        Fitted array.
 
         """
         self.kwargs = kwargs

@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.svm import SVR
 from sklearn.model_selection import GridSearchCV
 
-class SVRModel(TrendBaseModel):
+class SvrModel(TrendBaseModel):
     model = 'svr'
     
     def __init__(self):

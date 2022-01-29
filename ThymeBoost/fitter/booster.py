@@ -4,7 +4,6 @@
 import numpy as np
 import pandas as pd
 import copy
-
 from ThymeBoost.utils.get_complexity import get_complexity
 from ThymeBoost.cost_functions import calc_cost
 from ThymeBoost.fitter.decompose import Decompose
@@ -125,7 +124,6 @@ class booster(Decompose):
                                    self.c,
                                    self.regularization,
                                    self.boosting_params['global_cost'])
-
             if self.i == 0:
                 self.cost = round_cost
             if (round_cost <= self.cost and self.n_rounds == -1) or self.i < self.n_rounds:

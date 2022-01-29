@@ -155,7 +155,7 @@ class LinearModel(TrendBaseModel):
         self.fitted = X.dot(beta) + bias
         slope = self.fitted[-1] - self.fitted[-2]
         self.model_params = (slope, self.fitted[-1])
-        return self.fitted
+        return self.fitted.reshape(-1, )
 
     def predict(self, forecast_horizon, model_params):
         last_fitted_value = model_params[1]

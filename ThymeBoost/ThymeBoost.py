@@ -766,19 +766,20 @@ if __name__ == '__main__':
                                )
     output = boosted_model.fit(y,
                                   min_sample_pct=.2,
-                                           trend_estimator='arima',
+                                           trend_estimator='linear',
                                            init_trend='linear',
-                                           seasonal_estimator='fourier',
+                                           seasonal_estimator='naive',
+                                           fourier_order=3,
                                            arima_order='auto',
-                                           seasonal_period=12,
+                                           seasonal_period=25,
                                            window_size=[3, 25, 15, 25],
-                                           additive=False,
+                                           additive=True,
                                            global_cost='mse',
-                                           fit_type='local')
+                                           fit_type='global')
     # output = boosted_model.autofit(y,
     #                                        seasonal_period=25,
     #                                        )
-    predicted_output = boosted_model.predict(output, 43, trend_penalty=True)
+    predicted_output = boosted_model.predict(output, 25, trend_penalty=False)
     boosted_model.plot_results(output, predicted_output)
     boosted_model.plot_components(output, predicted_output)
     look = boosted_model.booster_obj

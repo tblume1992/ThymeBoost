@@ -4,6 +4,14 @@ import numpy as np
 from statsmodels.tsa.api import SimpleExpSmoothing, Holt
 
 class EtsModel(TrendBaseModel):
+    """Several ETS methods from Statsmodels including:
+            'ses': Simple Exponential Smoother
+            'des': Double Exponential Smoother
+            'damped_des': Damped Double Exponential Smoother
+        These are to be passed as the 'trend_estimator' parameter in the ThymeBoost fit method.
+        If alpha or beta are not given then it will follow Statsmodels optimization.
+        For more info: https://www.statsmodels.org/stable/examples/notebooks/generated/exponential_smoothing.html
+    """
     model = 'ets'
     
     def __init__(self):
@@ -41,14 +49,16 @@ class EtsModel(TrendBaseModel):
 
         Parameters
         ----------
-        time_series : TYPE
+        time_series : np.ndarray
             DESCRIPTION.
-        **kwargs : TYPE
-            DESCRIPTION.
+        **kwargs : 
+            Key 1: 'alpha': The alpha parameter for the level smoothing. If not given then this will be optimized
+            Key 2: 'beta': The beta parameter for the trend smoothing. If not given then this will be optimized
+
 
         Returns
         -------
-        None.
+        Fitted array.
 
         """
         self.model = kwargs['model']

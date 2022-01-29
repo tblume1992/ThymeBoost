@@ -143,7 +143,7 @@ class FitTrend:
         elif trend_estimator == 'zero':
             fit_obj = zero_trend.ZeroModel
         elif trend_estimator == 'svr':
-            fit_obj = svr_trend.SVRModel
+            fit_obj = svr_trend.SvrModel
         else:
             raise NotImplementedError('That trend estimation is not availale yet, add it to the road map!')
         return fit_obj
@@ -195,7 +195,6 @@ class FitTrend:
                                     fit_constant=True,
                                     model=self.trend_estimator,
                                     **self.kwargs)
-            fitted = fitted.reshape(-1,)
             self.split = None
             self.model_params = global_obj.model_params
             self.model_obj = global_obj

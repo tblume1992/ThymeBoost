@@ -6,6 +6,14 @@ from sklearn.linear_model import RANSACRegressor
 from sklearn.linear_model import LinearRegression
 
 class RansacModel(TrendBaseModel):
+    """Uses sklearn's RANSACRegressor method to build a robust regression.
+    The parameters that can be passed for this trend are:
+        ransac_min_samples
+        ransac_trials
+        poly
+        fit_constant
+    For more info: https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.RANSACRegressor.html
+    """
     model = 'ransac'
     
     def __init__(self):
@@ -90,7 +98,7 @@ class RansacModel(TrendBaseModel):
         slope = self.fitted[-1] - self.fitted[-2]
         last_value = self.fitted[-1]
         self.model_params = (slope, last_value)
-        return self.fitted
+        return self.fitted.reshape(-1, )
 
     def predict(self, forecast_horizon, model_params):
         last_fitted_value = model_params[1]

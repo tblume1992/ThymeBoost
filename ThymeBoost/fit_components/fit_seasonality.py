@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import numpy as np
-from ThymeBoost.seasonality_models import (classic_seasonality, fourier_seasonality)
+from ThymeBoost.seasonality_models import (classic_seasonality, fourier_seasonality,
+                                           naive_seasonality)
 
 
 class FitSeasonality:
@@ -28,6 +29,8 @@ class FitSeasonality:
             seasonal_obj = fourier_seasonality.FourierSeasonalityModel
         elif seasonal_estimator == 'classic':
             seasonal_obj = classic_seasonality.ClassicSeasonalityModel
+        elif seasonal_estimator == 'naive':
+            seasonal_obj = naive_seasonality.NaiveSeasonalityModel
         else:
             raise NotImplementedError('That seasonal estimation is not availale yet, add it to the road map!')
         return seasonal_obj

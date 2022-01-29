@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 
 class ZeroModel(TrendBaseModel):
+    """A utility trend method. If you do not want to center or detrend your data before approximating seasonality then it is useful.
+    """
     model = 'zero'
     
     def __init__(self):

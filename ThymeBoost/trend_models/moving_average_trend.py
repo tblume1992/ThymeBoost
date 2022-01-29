@@ -4,6 +4,9 @@ import numpy as np
 import pandas as pd
 
 class MovingAverageModel(TrendBaseModel):
+    """A simple moving average utilizing the rolling functionality of pandas.
+    The only argument to pass from ThymeBoost's fit is the 'window_size' parameter.
+    """
     model = 'moving_average'
     
     def __init__(self):
@@ -21,8 +24,8 @@ class MovingAverageModel(TrendBaseModel):
         ----------
         time_series : TYPE
             DESCRIPTION.
-        **kwargs : TYPE
-            DESCRIPTION.
+        **kwargs : 
+            Key 1: window_size: the size of the window used to average while rolling through series.
 
         Returns
         -------
