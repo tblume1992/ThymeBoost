@@ -6,12 +6,12 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="ThymeBoost",
-    version="0.1.7",
+    version="0.1.8",
     author="Tyler Blume",
     url="https://github.com/tblume1992/ThymeBoost",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    description = "Spicy time series forecasting.",
+    description = "Gradient boosted time series decomposition for forecasting.",
     author_email = 'tblume@mail.USF.edu', 
     keywords = ['forecasting', 'time series', 'seasonality', 'trend'],
       install_requires=[           
