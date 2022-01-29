@@ -6,7 +6,7 @@ from ThymeBoost.split_proposals import SplitProposals
 from ThymeBoost.trend_models import (linear_trend, mean_trend, median_trend,
                                      loess_trend, ransac_trend, ewm_trend,
                                      ets_trend, arima_trend, moving_average_trend,
-                                     zero_trend)
+                                     zero_trend, svr_trend)
 
 
 class FitTrend:
@@ -142,6 +142,8 @@ class FitTrend:
             fit_obj = moving_average_trend.MovingAverageModel
         elif trend_estimator == 'zero':
             fit_obj = zero_trend.ZeroModel
+        elif trend_estimator == 'svr':
+            fit_obj = svr_trend.SVRModel
         else:
             raise NotImplementedError('That trend estimation is not availale yet, add it to the road map!')
         return fit_obj

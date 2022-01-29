@@ -49,11 +49,14 @@ class Decompose:
         raise ValueError('Multiplicative Seasonality is not enabled!')
 
     def get_init_trend_component(self, time_series):
-        self.trend_obj = FitTrend(trend_estimator='median',
+        self.trend_obj = FitTrend(trend_estimator=next(self.boosting_params['init_trend']),
                                   fit_type='global',
                                   given_splits=self.given_splits,
                                   exclude_splits=self.exclude_splits,
                                   min_sample_pct=.01,
+                                  poly=1,
+                                  trend_weights=None,
+                                  l2=None,
                                   n_split_proposals=self.n_split_proposals,
                                   approximate_splits=self.approximate_splits,
                                   split_cost='mse',
