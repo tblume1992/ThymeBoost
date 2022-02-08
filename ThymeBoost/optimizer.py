@@ -99,9 +99,14 @@ class Optimizer(ParamIterator):
         results = {}
         for num_steps in range(1, self.optimization_steps + 1):
             y_copy = self.y.copy(deep=True)
-            test_y = y_copy[-self.lag - num_steps + 1:]
-            train_y = y_copy[:-self.lag - num_steps + 1]
-            test_y = test_y[:self.lag]
+            if self.optimization_strategy == 'cv':
+                test_y = y_copy[-self.lag * num_steps + 1:]
+                train_y = y_copy[:-self.lag * num_steps + 1]
+                test_y = test_y[:self.lag]
+            else:
+                test_y = y_copy[-self.lag - num_steps + 1:]
+                train_y = y_copy[:-self.lag - num_steps + 1]
+                test_y = test_y[:self.lag]
             results[str(num_steps)] = {}
             if self.verbose:
                 param_iters = tqdm(self.parameters)
@@ -146,13 +151,14 @@ class Optimizer(ParamIterator):
                         test_error = self.optimization_metric(actuals=test_y,
                                                               predicted=predicted)
                     elif self.test_set == 'last':
-                        test_error = self.optimization_metric(actuals=test_y[-1],
-                                                              predicted=predicted[-1])
+                        test_error = self.optimization_metric(actuals=test_y.iloc[-1],
+                                                              predicted=predicted.iloc[-1])
                     key = ','.join(map(str, run_settings.values()))
                     results[str(num_steps)][key] = {}
                     results[str(num_steps)][key]['error'] = test_error
                     params.update(ensemble_dict)
                     results[str(num_steps)][key]['params'] = params
+                    results[str(num_steps)][key]['predictions'] = predicted
                 # except Exception as e:
                 #     results[str(num_steps)][','.join(map(str, run_settings))] = np.inf
                 #     print(f'{e} Error running settings: {run_settings}')
@@ -171,6 +177,9 @@ class Optimizer(ParamIterator):
         average_result = average_result.sort_values()
         best_setting = average_result.index[0]
         self.run_settings = opt_results['1'][best_setting]['params']
+        self.cv_predictions = []
+        for k, v in opt_results.items():
+            self.cv_predictions.append(opt_results[k][best_setting]['predictions'])
         ensemble, _ = Optimizer.combiner_check(self.run_settings, wrap_values=False)
         if ensemble:
             output = self.model_object.ensemble(self.y, **self.run_settings)
@@ -180,4 +189,6 @@ class Optimizer(ParamIterator):
             print(f'Optimal model configuration: {self.run_settings}')
             print(f'Params ensembled: {ensemble}')
         return output
+
+
 

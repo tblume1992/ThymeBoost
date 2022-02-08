@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import matplotlib.pyplot as plt
-
+from itertools import cycle
 
 def plot_components(fitted_df, predicted_df, figsize):
     """Simple plot of components for convenience"""
@@ -71,6 +71,28 @@ def plot_results(fitted_df, predicted_df, figsize):
     if 'outliers' in fitted_df.columns:
         outlier_df = fitted_df[fitted_df['outliers'] == True]
         ax.scatter(outlier_df.index, outlier_df['y'], marker='x', color='red')
+    plt.show()
+
+def plot_optimization(fitted_df, opt_predictions, opt_type, figsize):
+    """Simple plot of optimization results for convenience"""
+    step_colors = ['tab:blue',
+                   'tab:orange',
+                   'tab:green',
+                   'tab:red',
+                   'tab:purple',
+                   'tab:cyan']
+    step_colors = cycle(step_colors)
+    min_opt_idx = opt_predictions[-1].index[0]
+    fitted_y = fitted_df['yhat'].loc[:min_opt_idx]
+    fig, ax = plt.subplots(figsize=figsize)
+    ax.plot(fitted_df['y'], color='black')
+    ax.plot(fitted_y, color='orange')
+    for idx, i in enumerate(opt_predictions):
+        section_color = next(step_colors)
+        ax.plot(i, color=section_color, linestyle='dashed')
+        if opt_type in ['holdout', 'cv']:
+            ax.axvspan(i.index[0], i.index[-1], alpha=0.2, color=section_color, linestyle='dashed')
+    ax.set_title('ThymeBoost Optimization')
     plt.show()
 
 # def plot_rounds(self, figsize = (6,4)):

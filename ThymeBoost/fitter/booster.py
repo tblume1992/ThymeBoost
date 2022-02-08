@@ -43,6 +43,21 @@ class booster(Decompose):
         self.smoothed_trend = smoothed_trend
         self.additive = additive
 
+    def __add__(self, booster_obj):
+        self.i += booster_obj.i
+        self.trend_objs += booster_obj.trend_objs
+        self.seasonal_objs += booster_obj.seasonal_objs
+        self.exo_objs += booster_obj.exo_objs
+        self.trend_pred_params += booster_obj.trend_pred_params
+        self.seasonal_pred_params += booster_obj.seasonal_pred_params
+        self.exo_pred_params += booster_obj.exo_pred_params
+        self.trends += booster_obj.trends
+        self.seasonalities += booster_obj.seasonalities
+        self.errors += booster_obj.errors
+        self.fitted_exogenous += booster_obj.fitted_exogenous
+        self.additive = booster_obj.additive
+        return self
+
     def initialize_booster_values(self):
         self.split = None
         self.i = -1
