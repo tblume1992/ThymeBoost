@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="ThymeBoost",
-    version="0.1.8",
+    version="0.1.9",
     author="Tyler Blume",
     url="https://github.com/tblume1992/ThymeBoost",
     long_description=long_description,

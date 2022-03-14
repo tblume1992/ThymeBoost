@@ -91,7 +91,7 @@ class ThymeBoost:
 
     """
     __framework__ = 'main'
-    version = '0.1.7'
+    version = '0.1.9'
     author = 'Tyler Blume'
 
     def __init__(self,
@@ -747,4 +747,5 @@ class ThymeBoost:
 
         """
         plotting.plot_components(fitted, predicted, figsize)
+
 

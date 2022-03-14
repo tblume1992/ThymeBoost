@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import statsmodels.api as sm
+import numpy as np
+import pandas as pd
 from ThymeBoost.exogenous_models.exogenous_base_class import ExogenousBaseModel
 
 
@@ -18,4 +20,6 @@ class OLS(ExogenousBaseModel):
         return self.fitted
 
     def predict(self, future_exogenous):
+        if isinstance(future_exogenous, pd.DataFrame):
+            future_exogenous = future_exogenous.to_numpy()
         return self.model_obj.predict(future_exogenous)
