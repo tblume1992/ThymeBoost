@@ -2,8 +2,11 @@
 import unittest
 import pandas as pd
 import numpy as np
+# from ThymeBoost.trend_models import (linear_trend, mean_trend, median_trend,
+#                                      loess_trend, ransac_trend, ewm_trend,
+#                                      ets_trend, arima_trend, moving_average_trend,
+#                                      zero_trend, svr_trend, naive_trend)
 from ThymeBoost.trend_models import *
-
 def testing_data():
     seasonality = ((np.cos(np.arange(1, 101))*10 + 50))
     np.random.seed(100)
@@ -99,6 +102,10 @@ class SvrTest(BaseModelTest, unittest.TestCase):
 class RansacTest(BaseModelTest, unittest.TestCase):
     def setUp(self):
         self.set_model_obj(ransac_trend.RansacModel())
+
+class NaiveTest(BaseModelTest, unittest.TestCase):
+    def setUp(self):
+        self.set_model_obj(naive_trend.NaiveModel())
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-# ThymeBoost v0.1.9
+# ThymeBoost v0.1.10
 
 [![Documentation Status](https://readthedocs.org/projects/thymeboost/badge/?version=latest)](https://thymeboost.readthedocs.io/en/latest/?badge=latest) [![Downloads](https://pepy.tech/badge/thymeboost)](https://pepy.tech/project/thymeboost)
 

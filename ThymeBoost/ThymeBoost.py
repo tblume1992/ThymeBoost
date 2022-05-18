@@ -91,7 +91,7 @@ class ThymeBoost:
 
     """
     __framework__ = 'main'
-    version = '0.1.9'
+    version = '0.1.10'
     author = 'Tyler Blume'
 
     def __init__(self,
@@ -106,6 +106,7 @@ class ThymeBoost:
                  n_rounds=None,
                  smoothed_trend=False,
                  scale_type=None,
+                 split_strategy='gradient',
                  error_handle='raise'):
         self.verbose = verbose
         self.n_split_proposals = n_split_proposals
@@ -128,6 +129,7 @@ class ThymeBoost:
         self.ensemble_boosters = None
         self._online_learning_ignore_params = None
         self.online_learning = None
+        self.split_strategy = split_strategy
         self.error_handle = error_handle
 
     def scale_input(self, time_series):
@@ -312,6 +314,7 @@ class ThymeBoost:
                                    regularization=self.regularization,
                                    n_rounds=self.n_rounds,
                                    smoothed_trend=self.smoothed_trend,
+                                   split_strategy=self.split_strategy,
                                    **_params)
         booster_results = self.booster_obj.boost()
         fitted_trend = booster_results[0]
@@ -486,10 +489,10 @@ class ThymeBoost:
                  time_series,
                  seasonal_period=[0],
                  optimization_type='grid_search',
-                 optimization_strategy='rolling',
+                 optimization_strategy='cv',
                  optimization_steps=3,
                  lag=2,
-                 optimization_metric='smape',
+                 optimization_metric='mse',
                  test_set='all',
                  verbose=1):
         """
@@ -558,19 +561,26 @@ class ThymeBoost:
         else:
             additive = [False]
 
-        param_dict = {'trend_estimator': ['linear', ['linear', 'ses'], 'ses'],
+        param_dict = {'trend_estimator': ['linear',
+                                          ['linear', 'ses'],
+                                          'ses',
+                                          ThymeBoost.combine(['ses', 'des', 'damped_des'])],
+                      # 'arima_order': ['auto'],
                       'seasonal_estimator': ['fourier'],
                       'seasonal_period': seasonal_period,
                       'fit_type': ['global'],
-                      'global_cost': ['mse', 'maicc'],
+                      'global_cost': ['mse'],
                       'additive': additive
                       }
-        if len(time_series) > 2 * max_seasonal_pulse and max_seasonal_pulse:
-            seasonality_weights = np.ones(len(time_series))
-            seasonality_weights[(-2 * max_seasonal_pulse):] = 5
-            basic_weights = np.ones(len(time_series))
-            param_dict['seasonality_weights'] = [basic_weights,
-                                                 seasonality_weights]
+        if len(time_series) > 2.5 * max_seasonal_pulse and max_seasonal_pulse:
+            seasonal_sample_weights = []
+            weight = 1
+            for i in range(len(y)):
+                if (i) % max_seasonal_pulse == 0:
+                    weight += 1
+                seasonal_sample_weights.append(weight)
+            param_dict['seasonality_weights'] = [None,
+                                                 np.array(seasonal_sample_weights)]
         self.optimizer = Optimizer(self,
                                    time_series,
                                    optimization_type,
@@ -748,4 +758,8 @@ class ThymeBoost:
         """
         plotting.plot_components(fitted, predicted, figsize)
 
+    def plot_optimization(self, fitted):
+        opt_predictions = self.optimizer.cv_predictions
+        opt_type = self.optimizer.optimization_strategy
+        plotting.plot_optimization(fitted, opt_predictions, opt_type=opt_type, figsize=(12,8))
 

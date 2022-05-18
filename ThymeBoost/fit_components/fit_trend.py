@@ -6,7 +6,7 @@ from ThymeBoost.split_proposals import SplitProposals
 from ThymeBoost.trend_models import (linear_trend, mean_trend, median_trend,
                                      loess_trend, ransac_trend, ewm_trend,
                                      ets_trend, arima_trend, moving_average_trend,
-                                     zero_trend, svr_trend)
+                                     zero_trend, svr_trend, naive_trend, croston_trend)
 
 
 class FitTrend:
@@ -85,6 +85,7 @@ class FitTrend:
                  time_series_index,
                  smoothed,
                  connectivity_constraint,
+                 split_strategy,
                  **kwargs
                  ):
         self.trend_estimator = trend_estimator.lower()
@@ -100,6 +101,7 @@ class FitTrend:
         self.smoothed = smoothed
         self.connectivity_constraint = connectivity_constraint
         self.split = None
+        self.split_strategy = split_strategy
         self.kwargs = kwargs
 
     @staticmethod
@@ -144,8 +146,12 @@ class FitTrend:
             fit_obj = zero_trend.ZeroModel
         elif trend_estimator == 'svr':
             fit_obj = svr_trend.SvrModel
+        elif trend_estimator == 'naive':
+            fit_obj = naive_trend.NaiveModel
+        elif trend_estimator == 'croston':
+            fit_obj = croston_trend.CrostonModel
         else:
-            raise NotImplementedError('That trend estimation is not availale yet, add it to the road map!')
+            raise NotImplementedError('That trend estimation is not available yet, add it to the road map!')
         return fit_obj
 
     def fit_trend_component(self, time_series):
@@ -156,6 +162,7 @@ class FitTrend:
                                        exclude_splits=self.exclude_splits,
                                        min_sample_pct=self.min_sample_pct,
                                        n_split_proposals=self.n_split_proposals,
+                                       split_strategy=self.split_strategy,
                                        approximate_splits=self.approximate_splits)
             proposals = proposals.get_split_proposals(time_series)
             for index, i in enumerate(proposals):

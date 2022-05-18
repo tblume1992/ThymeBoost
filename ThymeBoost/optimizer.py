@@ -113,7 +113,7 @@ class Optimizer(ParamIterator):
             else:
                 param_iters = self.parameters
             for settings in param_iters:
-                # try:
+                try:
                     run_settings = copy.deepcopy(settings)
                     ensemble, ensemble_dict = Optimizer.combiner_check(run_settings)
                     exo = Optimizer.exo_check(run_settings, ensemble)
@@ -159,27 +159,29 @@ class Optimizer(ParamIterator):
                     params.update(ensemble_dict)
                     results[str(num_steps)][key]['params'] = params
                     results[str(num_steps)][key]['predictions'] = predicted
-                # except Exception as e:
-                #     results[str(num_steps)][','.join(map(str, run_settings))] = np.inf
-                #     print(f'{e} Error running settings: {run_settings}')
-                #     traceback.print_exc()
+                    results[str(num_steps)][key]['actuals'] = test_y
+                except Exception as e:
+                    results[str(num_steps)][','.join(map(str, run_settings))] = np.inf
+                    if self.verbose:
+                        print(f'{e} Error running settings: {run_settings}')
+                        traceback.print_exc()
         return results
 
     def optimize(self):
-        opt_results = self.fit()
+        self.opt_results = self.fit()
         average_result = {}
-        for key in opt_results['1'].keys():
+        for key in self.opt_results['1'].keys():
             summation = 0
-            for step in opt_results.keys():
-                summation += opt_results[step][key]['error']
-            average_result[key] = summation / len(opt_results.keys())
+            for step in self.opt_results.keys():
+                summation += self.opt_results[step][key]['error']
+            average_result[key] = summation / len(self.opt_results.keys())
         average_result = pd.Series(average_result)
         average_result = average_result.sort_values()
         best_setting = average_result.index[0]
-        self.run_settings = opt_results['1'][best_setting]['params']
+        self.run_settings = self.opt_results['1'][best_setting]['params']
         self.cv_predictions = []
-        for k, v in opt_results.items():
-            self.cv_predictions.append(opt_results[k][best_setting]['predictions'])
+        for k, v in self.opt_results.items():
+            self.cv_predictions.append(self.opt_results[k][best_setting]['predictions'])
         ensemble, _ = Optimizer.combiner_check(self.run_settings, wrap_values=False)
         if ensemble:
             output = self.model_object.ensemble(self.y, **self.run_settings)

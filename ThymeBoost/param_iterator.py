@@ -41,7 +41,7 @@ class ParamIterator:
             exogenous = None
         if 'ewm' not in v and 'ewm_alpha' in k:
             params['ewm_alpha'] = None
-        if ('ses' not in v and 'des' not in v and 'damped_des' not in v) and \
+        if ('ses' not in v and 'des' not in v and 'damped_des' not in v and 'croston' not in v) and \
            ('alpha' in k):
             params['alpha'] = None
         if ('des' not in v and 'damped_des' not in v) and \

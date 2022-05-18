@@ -24,6 +24,7 @@ class booster(Decompose):
                  n_rounds,
                  smoothed_trend,
                  additive,
+                 split_strategy,
                  **kwargs):
         time_series = pd.Series(time_series).copy(deep=True)
         self.time_series_index = time_series.index
@@ -42,6 +43,7 @@ class booster(Decompose):
         self.n_rounds = n_rounds
         self.smoothed_trend = smoothed_trend
         self.additive = additive
+        self.split_strategy = split_strategy
 
     def __add__(self, booster_obj):
         self.i += booster_obj.i

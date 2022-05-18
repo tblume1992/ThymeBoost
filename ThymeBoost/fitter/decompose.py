@@ -23,6 +23,7 @@ class Decompose:
                  n_rounds,
                  smoothed_trend,
                  additive,
+                 split_strategy,
                  **kwargs):
         time_series = pd.Series(time_series)
         self.time_series_index = time_series.index
@@ -41,6 +42,7 @@ class Decompose:
         self.n_rounds = n_rounds
         self.smoothed_trend = smoothed_trend
         self.additive = additive
+        self.split_strategy = split_strategy
 
     def update_iterated_features(self):
         self.boosting_params = {k: next(v) for k, v in self.kwargs.items()}
@@ -63,7 +65,9 @@ class Decompose:
                                   trend_lr=1,
                                   time_series_index=self.time_series_index,
                                   smoothed=False,
-                                  connectivity_constraint=True)
+                                  connectivity_constraint=True,
+                                  split_strategy=self.split_strategy
+                                  )
         trend = self.trend_obj.fit_trend_component(time_series)
         self.trends.append(trend)
         self.split = self.trend_obj.split
@@ -77,6 +81,7 @@ class Decompose:
                                   smoothed=self.smoothed_trend,
                                   n_split_proposals=self.n_split_proposals,
                                   additive=self.additive,
+                                  split_strategy=self.split_strategy,
                                   **self.boosting_params)
         trend = self.trend_obj.fit_trend_component(time_series)
         self.trends.append(trend)

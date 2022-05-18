@@ -37,17 +37,19 @@ class Ensemble(ParamIterator):
             param_iters = tqdm(parameters)
         else:
             param_iters = parameters
-        outputs = []
+        self.outputs = []
+        self.params = []
         for run_settings in param_iters:
             y_copy = self.y.copy(deep=True)
             try:
                 output = self.model_object.fit(y_copy, **run_settings)
                 #key = ','.join(map(str, run_settings.values()))
-                outputs.append(output)
+                self.outputs.append(output)
+                self.params.append(run_settings)
                 ensemble_parameters.append(self.model_object.booster_obj)
             except Exception as e:
                 print(f'{e} Error running settings: {run_settings}')
                 traceback.print_exc()
-        output = pd.concat(outputs)
+        output = pd.concat(self.outputs)
         output = output.groupby(by=output.index).mean()
         return output, ensemble_parameters
