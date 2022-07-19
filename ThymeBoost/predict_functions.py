@@ -6,7 +6,11 @@ import matplotlib.pyplot as plt
 from ThymeBoost.utils import trend_dampen
 
 
-def predict_trend(booster_obj, boosting_round, forecast_horizon, trend_penalty):
+def predict_trend(booster_obj,
+                  boosting_round,
+                  forecast_horizon,
+                  trend_penalty,
+                  online_learning):
     """
     Predict the trend component using the booster
 
@@ -31,6 +35,8 @@ def predict_trend(booster_obj, boosting_round, forecast_horizon, trend_penalty):
         if avg_slope != 0:
             penalty = booster_obj.trend_strengths[boosting_round]
             trend_round = trend_dampen.trend_dampen(1-penalty, trend_round)
+    if online_learning:
+        trend_model._online_steps += forecast_horizon
     return trend_round
 
 
@@ -92,7 +98,8 @@ def predict_exogenous(booster_obj,
 def predict_rounds(booster_obj,
                    forecast_horizon,
                    trend_penalty,
-                   future_exo=None):
+                   future_exo=None,
+                   online_learning=False):
     """
     Predict all the rounds from a booster
 
@@ -120,7 +127,8 @@ def predict_rounds(booster_obj,
         trend_predictions += predict_trend(booster_obj,
                                            boosting_round,
                                            forecast_horizon,
-                                           trend_penalty)
+                                           trend_penalty,
+                                           online_learning)
         seasonal_predictions += predict_seasonality(booster_obj,
                                                     boosting_round,
                                                     forecast_horizon)

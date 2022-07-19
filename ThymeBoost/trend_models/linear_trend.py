@@ -9,6 +9,7 @@ class LinearModel(TrendBaseModel):
     def __init__(self):
         self.model_params = None
         self.fitted = None
+        self._online_steps = 0
 
     def __str__(self):
         return f'{self.model}({self.kwargs["poly"], self.kwargs["l2"]})'
@@ -160,5 +161,6 @@ class LinearModel(TrendBaseModel):
     def predict(self, forecast_horizon, model_params):
         last_fitted_value = model_params[1]
         slope = model_params[0]
-        predicted = np.arange(1, forecast_horizon + 1) * slope + last_fitted_value
-        return predicted.reshape(-1, )
+        predicted = np.arange(1, self._online_steps + forecast_horizon + \
+                              1) * slope + last_fitted_value
+        return predicted[-forecast_horizon:].reshape(-1, )

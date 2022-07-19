@@ -91,7 +91,7 @@ class ThymeBoost:
 
     """
     __framework__ = 'main'
-    version = '0.1.10'
+    version = '0.1.11'
     author = 'Tyler Blume'
 
     def __init__(self,
@@ -282,7 +282,7 @@ class ThymeBoost:
             tree_depth=1,
             additive=True,
             init_trend='median'):
-
+        self.additive = additive
         if seasonal_period is None:
             seasonal_period = 0
         if additive:
@@ -377,6 +377,7 @@ class ThymeBoost:
                                                            forecast_horizon,
                                                            trend_penalty,
                                                            future_exogenous,
+                                                           self.online_learning
                                                            )
             fitted_output = copy.deepcopy(fitted_output)
             predicted_output = self.builder.build_predicted_df(fitted_output,
@@ -564,8 +565,9 @@ class ThymeBoost:
         param_dict = {'trend_estimator': ['linear',
                                           ['linear', 'ses'],
                                           'ses',
+                                          'arima',
                                           ThymeBoost.combine(['ses', 'des', 'damped_des'])],
-                      # 'arima_order': ['auto'],
+                       'arima_order': ['auto'],
                       'seasonal_estimator': ['fourier'],
                       'seasonal_period': seasonal_period,
                       'fit_type': ['global'],
@@ -601,39 +603,53 @@ class ThymeBoost:
                ):
         """
         Experimental feature to do online learning.
-        TODO : fix bound issue
+        TODO : More testing!
 
         Parameters
         ----------
         output : pd.DataFrame
             Output from fit method.
         new_input : TYPE
-            DESCRIPTION.
+            The new data to update the model on. Use same input type as fitted.
 
         Returns
         -------
-        full_output : TYPE
-            DESCRIPTION.
+        full_output : pd.DataFrame
+            The same output format that is returned from the fit method.
 
         """
+        assert self.additive == True, 'Additive must be True for online learning'
+        if not isinstance(new_input, pd.Series) or isinstance(new_input, np.ndarray):
+            new_input = np.array(new_input).reshape(-1, )
         original_booster = self.booster_obj
         self.online_learning = True
         predictions = self.predict(output, len(new_input), uncertainty=False)
         update_series = output['y'] - output['yhat']
         update_series = update_series.append(new_input - predictions['predictions'])
         updated_output = self.fit(update_series, **self._params)
-        predictions.columns = ['yhat',
-                               'trend',
-                               'seasonality',
-                               'exogenous',
-                               'yhat_upper',
-                               'yhat_lower'
-                                ]
+        column_names = ['yhat',
+                        'trend',
+                        'seasonality',
+                        'exogenous',
+                        'yhat_upper',
+                        'yhat_lower'
+                         ]
+        predictions.columns = column_names
         predictions['y'] = new_input
         predictions = predictions[output.columns]
         full_output = output.append(predictions)
-        full_output = full_output + updated_output
+        if self.additive:
+            full_output.iloc[:, 1:] += updated_output.iloc[:, 1:]
+        else:
+            full_output[column_names - ['y']] += updated_output[column_names - ['y']]
+            full_output['seasonality'] = full_output['seasonality'] + \
+                                        full_output['seasonality']
+            raise
         self.booster_obj = original_booster + self.booster_obj
+        self.builder.time_series = full_output['y']
+        bounds = self.builder.get_fitted_intervals(full_output['y'],
+                                                   full_output['yhat'])
+        full_output['yhat_upper'], full_output['yhat_lower'] = bounds
         self.online_learning = None
         return full_output
 
@@ -762,4 +778,3 @@ class ThymeBoost:
         opt_predictions = self.optimizer.cv_predictions
         opt_type = self.optimizer.optimization_strategy
         plotting.plot_optimization(fitted, opt_predictions, opt_type=opt_type, figsize=(12,8))
-

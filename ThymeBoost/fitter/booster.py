@@ -54,6 +54,7 @@ class booster(Decompose):
         self.seasonal_pred_params += booster_obj.seasonal_pred_params
         self.exo_pred_params += booster_obj.exo_pred_params
         self.trends += booster_obj.trends
+        self.trend_strengths += booster_obj.trend_strengths
         self.seasonalities += booster_obj.seasonalities
         self.errors += booster_obj.errors
         self.fitted_exogenous += booster_obj.fitted_exogenous

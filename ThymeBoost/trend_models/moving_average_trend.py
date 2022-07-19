@@ -12,6 +12,7 @@ class MovingAverageModel(TrendBaseModel):
     def __init__(self):
         self.model_params = None
         self.fitted = None
+        self._online_steps = 0
 
     def __str__(self):
         return f'{self.model}({self.kwargs["window_size"]})'

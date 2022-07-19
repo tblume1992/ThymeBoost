@@ -31,9 +31,9 @@ class BuildOutput:
         return future_index
 
     @staticmethod
-    def get_fitted_intervals(y, fitted, c):
+    def get_fitted_intervals(y, fitted):
         """
-        A interval calculation based on lienar regression, only useful for non-smoother/state space/local models.
+        A interval calculation based on linear regression, only useful for non-smoother/state space/local models.
         TODO: Look for generalized approach, possibly using rolling predicted residuals?
 
         Parameters
@@ -115,8 +115,7 @@ class BuildOutput:
         if exogenous is not None:
             yhat += exogenous
         upper_fitted, lower_fitted = self.get_fitted_intervals(self.scaler_obj(self.time_series),
-                                                               self.scaler_obj(yhat),
-                                                               c=self.c)
+                                                               self.scaler_obj(yhat))
         if exogenous is not None:
             output['exogenous'] = exogenous
             # output['Exogenous Summary'] = self.get_boosted_exo_results(exo_impact)

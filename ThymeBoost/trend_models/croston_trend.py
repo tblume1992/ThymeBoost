@@ -10,6 +10,7 @@ class CrostonModel(TrendBaseModel):
     def __init__(self):
         self.model_params = None
         self.fitted = None
+        self._online_steps = 0
 
     def __str__(self):
         return f'{self.model}()'
@@ -37,6 +38,8 @@ class CrostonModel(TrendBaseModel):
         y -= bias
         n_timepoints = len(y)  # Historical period: i.e the input array's length
         smoothing = kwargs['alpha']
+        if smoothing is None:
+            smoothing = .5
 
         # Fit the parameters: level(q), periodicity(a) and forecast(f)
         q, a, f = np.full((3, n_timepoints + 1), np.nan)
