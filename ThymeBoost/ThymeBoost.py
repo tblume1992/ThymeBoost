@@ -91,7 +91,7 @@ class ThymeBoost:
 
     """
     __framework__ = 'main'
-    version = '0.1.11'
+    version = '0.1.13'
     author = 'Tyler Blume'
 
     def __init__(self,
@@ -565,7 +565,7 @@ class ThymeBoost:
         param_dict = {'trend_estimator': ['linear',
                                           ['linear', 'ses'],
                                           'ses',
-                                          'arima',
+                                           'arima',
                                           ThymeBoost.combine(['ses', 'des', 'damped_des'])],
                        'arima_order': ['auto'],
                       'seasonal_estimator': ['fourier'],
@@ -577,7 +577,7 @@ class ThymeBoost:
         if len(time_series) > 2.5 * max_seasonal_pulse and max_seasonal_pulse:
             seasonal_sample_weights = []
             weight = 1
-            for i in range(len(y)):
+            for i in range(len(time_series)):
                 if (i) % max_seasonal_pulse == 0:
                     weight += 1
                 seasonal_sample_weights.append(weight)
@@ -778,3 +778,12 @@ class ThymeBoost:
         opt_predictions = self.optimizer.cv_predictions
         opt_type = self.optimizer.optimization_strategy
         plotting.plot_optimization(fitted, opt_predictions, opt_type=opt_type, figsize=(12,8))
+
+
+
+
+
+
+
+
+
