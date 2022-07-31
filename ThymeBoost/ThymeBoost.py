@@ -3,7 +3,7 @@ r"""
 ThymeBoost combines time series decomposition with gradient boosting to 
 provide a flexible mix-and-match time series framework. At the most granular 
 level are the trend/level (going forward this is just referred to as 'trend') 
-models, seasonal models,  and edogenous models. These are used to approximate 
+models, seasonal models,  and exogenous models. These are used to approximate 
 the respective components at each 'boosting round'. Concurrent rounds are 
 fit on residuals in usual boosting fashion.
 
@@ -778,12 +778,6 @@ class ThymeBoost:
         opt_predictions = self.optimizer.cv_predictions
         opt_type = self.optimizer.optimization_strategy
         plotting.plot_optimization(fitted, opt_predictions, opt_type=opt_type, figsize=(12,8))
-
-
-
-
-
-
 
 
 

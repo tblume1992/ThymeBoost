@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# #-*- coding: utf-8 -*-
 
 # from sklearn.model_selection import TimeSeriesSplit
 # from sklearn.metrics import mean_squared_error
@@ -9,14 +9,16 @@
 # from hyperopt.pyll import scope
 # from hyperopt.fmin import fmin
 # import numpy as np
+# import pandas as pd
+# from ThymeBoost import ThymeBoost as tb
 
 
 # class Optimize:
 #     def __init__(self,
-#                  y,
-#                  seasonal_period=0,
-#                  n_folds=3,
-#                  test_size=None):
+#                   y,
+#                   seasonal_period=0,
+#                   n_folds=3,
+#                   test_size=None):
 #         self.y = y
 #         self.seasonal_period = seasonal_period
 #         self.n_folds = n_folds
@@ -46,21 +48,21 @@
 #         if len(time_series) > 2.5 * max_seasonal_pulse and max_seasonal_pulse:
 #             seasonal_sample_weights = []
 #             weight = 1
-#             for i in range(len(y)):
+#             for i in range(len(time_series)):
 #                 if (i) % max_seasonal_pulse == 0:
 #                     weight += 1
 #                 seasonal_sample_weights.append(weight)
 #             self.seasonal_sample_weights = [None,
-#                                                  np.array(seasonal_sample_weights)]
+#                                                   np.array(seasonal_sample_weights)]
 
 #     def get_space(self):
 #         self.space = {
 #             'trend_estimator': hp.choice('trends', [{'trend_estimator': 'linear',
-#                                                      'poly': hp.choice('exp', [1, 2]),
-#                                                      'arima_order': 'auto',
-#                                                      'fit_type': hp.choice('cp1',
-#                                                                            ['local', 'global']),
-#                                                      },
+#                                                       'poly': hp.choice('exp', [1, 2]),
+#                                                       'arima_order': 'auto',
+#                                                       'fit_type': hp.choice('cp1',
+#                                                                             ['local', 'global']),
+#                                                       },
 #                                                     {'trend_estimator': 'arima',
 #                                                       'poly': 1,
 #                                                       'arima_order': 'auto',
@@ -72,22 +74,22 @@
 #                                                       'fit_type': 'global',
 #                                                       },
 #                                                     {'trend_estimator': 'ses',
-#                                                      'poly': 1,
-#                                                      'arima_order': 'auto',
-#                                                      'fit_type': 'global'
-#                                                      },
+#                                                       'poly': 1,
+#                                                       'arima_order': 'auto',
+#                                                       'fit_type': 'global'
+#                                                       },
 #                                                     {'trend_estimator': ['linear', 'ses'],
-#                                                      'poly': 1,
-#                                                      'arima_order': 'auto',
-#                                                      'fit_type': hp.choice('cp2',
-#                                                                            [['global'], ['local', 'global']])
-#                                                      },
+#                                                       'poly': 1,
+#                                                       'arima_order': 'auto',
+#                                                       'fit_type': hp.choice('cp2',
+#                                                                             [['global'], ['local', 'global']])
+#                                                       },
 #                                                     {'trend_estimator': 'mean',
-#                                                      'poly': 1,
-#                                                      'arima_order': 'auto',
-#                                                      'fit_type': hp.choice('cp3',
-#                                                                            ['global', 'local'])
-#                                                      }]),
+#                                                       'poly': 1,
+#                                                       'arima_order': 'auto',
+#                                                       'fit_type': hp.choice('cp3',
+#                                                                             ['global', 'local'])
+#                                                       }]),
 #             'global_cost': hp.choice('gcost', ['mse', 'maicc']),
 #             'additive': hp.choice('add', self.additive),
 #             'seasonal_estimator': hp.choice('seas', ['fourier', 'naive']),
@@ -99,14 +101,13 @@
 #         cv_splits = cv.split(y)
 #         mses = []
 #         for train_index, test_index in cv_splits:
-#             # print(np.shape(y[train_index]))
 #             fitted = model_obj.fit(y[train_index], **params)
 #             predicted = model_obj.predict(fitted, len(y[test_index]))
 #             predicted = predicted['predictions'].values
 #             mses.append(mean_squared_error(y[test_index], predicted))
 #         return_dict = {'loss': np.mean(mses),
-#                        'eval_time': time.time(),
-#                        'status': STATUS_OK}
+#                         'eval_time': time.time(),
+#                         'status': STATUS_OK}
 #         return return_dict
 
 
@@ -128,20 +129,16 @@
 #             'global_cost': params['global_cost'],
 
 #         }
-#         # print(params)
-#         clf = ThymeBoost()
-#         # score = cross_val_score(clf, self.y, self.y, scoring=mean_squared_error, cv=TimeSeriesSplit(self.n_folds)).mean()
+#         clf = tb.ThymeBoost()
 #         score = self.scorer(clf,
 #                             self.y,
 #                             mean_squared_error,
 #                             TimeSeriesSplit(self.n_folds, test_size=self.test_size),
 #                             params)
-#         # print(f"MSE {score} params {params}")
 #         return score
 
 #     def fit(self):
 #         self.logic_layer()
-#         # trials = Trials()
 #         best = fmin(fn=self.objective,
 #                     space=self.get_space(),
 #                     algo=tpe.suggest,
@@ -150,3 +147,11 @@
 #                     verbose=False)
 #         # print(best)
 #         return best
+
+
+# if __name__ == '__main__':
+#     opt = Optimize(example_data,
+#                    seasonal_period=12,
+#                    n_folds=3,
+#                    test_size=12)
+#     best_params = opt.fit()

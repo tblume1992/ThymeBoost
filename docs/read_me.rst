@@ -1,4 +1,4 @@
-Github Page
+Quick Start
 ===========
 
 https://github.com/tblume1992/ThymeBoost

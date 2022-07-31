@@ -22,7 +22,7 @@ copyright = '2021, Tyler Blume'
 author = 'Tyler Blume'
 
 # The full version, including alpha/beta/rc tags
-release = '0.1.3'
+release = '0.1.13'
 
 
 # -- General configuration ---------------------------------------------------
@@ -39,6 +39,14 @@ extensions = ['sphinx.ext.napoleon',
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
+master_doc = 'index'
+html_static_path = ['_static']
+
+html_logo = "tb_logo.png"
+html_theme_options = {
+    'logo_only': True,
+    'display_version': True,
+}
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -60,7 +68,7 @@ html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
 
 html_theme_options = {
-    'style_nav_header_background': '#E49B0F',
+    'style_nav_header_background': '#FFFFFF',
 }
 
 source_suffix = ['.rst', '.md']
