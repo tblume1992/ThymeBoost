@@ -2,7 +2,7 @@
 
 [![Documentation Status](https://readthedocs.org/projects/thymeboost/badge/?version=latest)](https://thymeboost.readthedocs.io/en/latest/?badge=latest) [![Downloads](https://pepy.tech/badge/thymeboost)](https://pepy.tech/project/thymeboost)
 
-![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/tb_logo.png?raw=true "Output 1")
+![alt text](https://github.com/tblume1992/ThymeBoost/blob/main/static/tb_logo (2).png?raw=true "Output 1")
 
 ThymeBoost combines time series decomposition with gradient boosting to provide a flexible mix-and-match time series framework for forecasting. At the most granular level are the trend/level (going forward this is just referred to as 'trend') models, seasonal models, and endogenous models. These are used to approximate the respective components at each 'boosting round' and sequential rounds are fit on residuals in usual boosting fashion.
 
