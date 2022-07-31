@@ -779,5 +779,3 @@ class ThymeBoost:
         opt_type = self.optimizer.optimization_strategy
         plotting.plot_optimization(fitted, opt_predictions, opt_type=opt_type, figsize=(12,8))
 
-
-
