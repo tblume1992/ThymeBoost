@@ -1,6 +1,6 @@
 # ThymeBoost v0.1.16
 
-##Changes with 1.16:
+## Changes with 1.16:
 
 New Trend Estimators: 'lbf' and 'decision_tree'. 'lbf' stands for linear basis functions and will fit a linear changepoint method with a similar vibe to that of Prophet. When this is boosted it gets much more smooth.
 
