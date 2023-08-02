@@ -140,6 +140,10 @@ class LinearModel(TrendBaseModel):
         fit_constant = kwargs['fit_constant']
         weight = kwargs['trend_weights']
         l2 = kwargs['l2']
+        if bias and weight is not None:
+            weight = weight[-len(y):]
+        elif weight is not None:
+            weight = weight[:len(y)]
         y = y - bias
         y = (y).reshape((-1, 1))
         X = np.array(list(range(len(y))), ndmin=1).reshape((-1, 1))  

@@ -53,8 +53,8 @@ class ParamIterator:
             params['l2'] = None
         if ('linear' not in v and 'ransac' not in v and 'loess' not in v) and 'poly' in k:
             params['poly'] = None
-        if 'loess' not in v and 'window_size' in k:
-            params['window_size'] = None
+        # if 'loess' not in v and 'window_size' in k and 'moving_average' not in v and 'window_size' in k:
+        #     params['window_size'] = None
         if 'fourier' not in v and 'fourier_order' in k:
             params['fourier_order'] = None
         if 'arima' not in str(v) and 'arima_order' in k:

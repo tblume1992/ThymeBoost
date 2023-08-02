@@ -91,7 +91,7 @@ class ThymeBoost:
 
     """
     __framework__ = 'main'
-    version = '0.1.13'
+    version = '0.1.15'
     author = 'Tyler Blume'
 
     def __init__(self,
@@ -280,6 +280,7 @@ class ThymeBoost:
             ransac_trials=100,
             ransac_min_samples=10,
             tree_depth=1,
+            n_changepoints=3,
             additive=True,
             init_trend='median'):
         self.additive = additive
@@ -495,7 +496,8 @@ class ThymeBoost:
                  lag=2,
                  optimization_metric='mse',
                  test_set='all',
-                 verbose=1):
+                 verbose=1,
+                 fast=False):
         """
         Grid search lazily through predefined search space in order to find the 
         params which result in the 'best' forecast depending on the given 
@@ -534,6 +536,8 @@ class ThymeBoost:
             DESCRIPTION. The default is 'all'.
         verbose : TYPE, optional
             DESCRIPTION. The default is 1.
+        fast : TYPE, optional
+            DESCRIPTION. The default is 1.
 
         Returns
         -------
@@ -554,7 +558,7 @@ class ThymeBoost:
         if not generator_seasonality:
             seasonal_period = [seasonal_period]
         if seasonal_period[0]:
-            seasonal_period = [0, seasonal_period, seasonal_period.append(0)]
+                seasonal_period = [0, seasonal_period]
 
         _contains_zero = not (time_series > 0).all()
         if _contains_zero:
@@ -562,18 +566,30 @@ class ThymeBoost:
         else:
             additive = [False]
 
-        param_dict = {'trend_estimator': ['linear',
-                                          ['linear', 'ses'],
-                                          'ses',
-                                           'arima',
-                                          ThymeBoost.combine(['ses', 'des', 'damped_des'])],
-                       'arima_order': ['auto'],
-                      'seasonal_estimator': ['fourier'],
-                      'seasonal_period': seasonal_period,
-                      'fit_type': ['global'],
-                      'global_cost': ['mse'],
-                      'additive': additive
-                      }
+        if fast:
+            param_dict = {'trend_estimator': ['linear',
+                                              ['linear', 'ses'],
+                                              'fast_arima',
+                                              'fast_ets'],
+                              'seasonal_estimator': ['fourier'],
+                              'seasonal_period': seasonal_period,
+                              'fit_type': ['global'],
+                              'global_cost': ['mse'],
+                              'additive': additive
+                              }
+        else:
+            param_dict = {'trend_estimator': ['linear',
+                                              ['linear', 'ses'],
+                                              'ses',
+                                               'arima',
+                                              ThymeBoost.combine(['ses', 'des', 'damped_des'])],
+                           'arima_order': ['auto'],
+                          'seasonal_estimator': ['fourier'],
+                          'seasonal_period': seasonal_period,
+                          'fit_type': ['global'],
+                          'global_cost': ['mse'],
+                          'additive': additive
+                          }
         if len(time_series) > 2.5 * max_seasonal_pulse and max_seasonal_pulse:
             seasonal_sample_weights = []
             weight = 1
@@ -778,4 +794,3 @@ class ThymeBoost:
         opt_predictions = self.optimizer.cv_predictions
         opt_type = self.optimizer.optimization_strategy
         plotting.plot_optimization(fitted, opt_predictions, opt_type=opt_type, figsize=(12,8))
-

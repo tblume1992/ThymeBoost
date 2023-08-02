@@ -5,7 +5,7 @@ from ThymeBoost.trend_models.trend_base_class import TrendBaseModel
 
 
 class CrostonModel(TrendBaseModel):
-    model = 'theta'
+    model = 'croston'
     
     def __init__(self):
         self.model_params = None
@@ -35,7 +35,7 @@ class CrostonModel(TrendBaseModel):
         """
         self.kwargs = kwargs
         bias = kwargs['bias']
-        y -= bias
+        # y -= bias
         n_timepoints = len(y)  # Historical period: i.e the input array's length
         smoothing = kwargs['alpha']
         if smoothing is None:
@@ -66,7 +66,7 @@ class CrostonModel(TrendBaseModel):
         self.fitted = f[1:]
         last_fitted_values = self.fitted[-1]
         self.model_params = last_fitted_values
-        return self.fitted
+        return self.fitted #+ bias
 
     def predict(self, forecast_horizon, model_params):
         return np.tile(model_params, forecast_horizon)

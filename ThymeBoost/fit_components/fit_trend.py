@@ -6,7 +6,10 @@ from ThymeBoost.split_proposals import SplitProposals
 from ThymeBoost.trend_models import (linear_trend, mean_trend, median_trend,
                                      loess_trend, ransac_trend, ewm_trend,
                                      ets_trend, arima_trend, moving_average_trend,
-                                     zero_trend, svr_trend, naive_trend, croston_trend)
+                                     zero_trend, svr_trend, naive_trend, croston_trend,
+                                     fast_arima_trend, fast_ets_trend, fast_ses_trend,
+                                     lbf_trend, fast_theta_trend, fast_ces_trend,
+                                     fast_imapa_trend, decision_tree_trend)
 
 
 class FitTrend:
@@ -150,6 +153,22 @@ class FitTrend:
             fit_obj = naive_trend.NaiveModel
         elif trend_estimator == 'croston':
             fit_obj = croston_trend.CrostonModel
+        elif trend_estimator == 'fast_arima':
+            fit_obj = fast_arima_trend.FastArimaModel
+        elif trend_estimator == 'fast_ets':
+            fit_obj = fast_ets_trend.FastETSModel
+        elif trend_estimator == 'lbf':
+            fit_obj = lbf_trend.LbfModel
+        elif trend_estimator == 'fast_theta':
+            fit_obj = fast_theta_trend.FastThetaModel
+        elif trend_estimator == 'fast_ses':
+            fit_obj = fast_ses_trend.FastSESModel
+        elif trend_estimator == 'fast_ces':
+            fit_obj = fast_ces_trend.FastCESModel
+        elif trend_estimator == 'fast_imapa':
+            fit_obj = fast_imapa_trend.FastIMAPAModel
+        elif trend_estimator == 'decision_tree':
+            fit_obj = decision_tree_trend.DecisionTreeModel
         else:
             raise NotImplementedError('That trend estimation is not available yet, add it to the road map!')
         return fit_obj
