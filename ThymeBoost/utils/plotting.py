@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import matplotlib.pyplot as plt
+import pandas as pd
 from itertools import cycle
 
 def plot_components(fitted_df, predicted_df, figsize):
@@ -14,7 +15,7 @@ def plot_components(fitted_df, predicted_df, figsize):
                        'predicted_exogenous': 'exogenous'}
         predicted_df = predicted_df.rename(rename_dict,
                                            axis=1)
-        component_df = fitted_df.append(predicted_df)
+        component_df = pd.concat([fitted_df, predicted_df])
     else:
         component_df = fitted_df
     if 'exogenous' in fitted_df.columns:
@@ -59,12 +60,12 @@ def plot_results(fitted_df, predicted_df, figsize):
             alpha=.5,
             color='orange')
     if predicted_df is not None:
-        ax.plot(fitted_df['yhat'].tail(1).append(predicted_df['predictions']),
+        ax.plot(pd.concat([fitted_df['yhat'].tail(1), predicted_df['predictions']]),
                 color='red',
                 linestyle='dashed')
-        ax.fill_between(x=fitted_df['yhat_lower'].tail(1).append(predicted_df['predicted_lower']).index,
-                        y1=fitted_df['yhat_lower'].tail(1).append(predicted_df['predicted_lower']).values,
-                        y2=fitted_df['yhat_upper'].tail(1).append(predicted_df['predicted_upper']).values,
+        ax.fill_between(x=pd.concat([fitted_df['yhat_lower'].tail(1), predicted_df['predicted_lower']]).index,
+                        y1=pd.concat([fitted_df['yhat_lower'].tail(1), predicted_df['predicted_lower']]).values,
+                        y2=pd.concat([fitted_df['yhat_upper'].tail(1), predicted_df['predicted_upper']]).values,
                         alpha=.5,
                         color='orange')
     ax.set_title('ThymeBoost Results')

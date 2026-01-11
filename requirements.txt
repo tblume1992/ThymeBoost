@@ -1,0 +1,9 @@
+numpy
+pandas>=2.0.0
+statsmodels
+scikit-learn
+scipy
+more-itertools
+matplotlib
+tqdm
+pmdarima

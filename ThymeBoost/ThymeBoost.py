@@ -641,7 +641,7 @@ class ThymeBoost:
         self.online_learning = True
         predictions = self.predict(output, len(new_input), uncertainty=False)
         update_series = output['y'] - output['yhat']
-        update_series = update_series.append(new_input - predictions['predictions'])
+        update_series = pd.concat([update_series, new_input - predictions['predictions']])
         updated_output = self.fit(update_series, **self._params)
         column_names = ['yhat',
                         'trend',
@@ -653,7 +653,7 @@ class ThymeBoost:
         predictions.columns = column_names
         predictions['y'] = new_input
         predictions = predictions[output.columns]
-        full_output = output.append(predictions)
+        full_output = pd.concat([output, predictions])
         if self.additive:
             full_output.iloc[:, 1:] += updated_output.iloc[:, 1:]
         else:

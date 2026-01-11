@@ -42,7 +42,14 @@ class Optimizer(ParamIterator):
                              'fit_type': ['local', 'global'],
                              'seasonal_period': [None]
                              }
-        self.search_space.update(kwargs)
+        # Wrap non-list values in kwargs to make them iterable for product()
+        wrapped_kwargs = {}
+        for k, v in kwargs.items():
+            if not isinstance(v, (list, tuple)):
+                wrapped_kwargs[k] = [v]
+            else:
+                wrapped_kwargs[k] = v
+        self.search_space.update(wrapped_kwargs)
         self.search_keys = self.search_space.keys()
 
     def set_optimization_metric(self):
@@ -172,16 +179,32 @@ class Optimizer(ParamIterator):
         average_result = {}
         for key in self.opt_results['1'].keys():
             summation = 0
+            valid_steps = 0
             for step in self.opt_results.keys():
-                summation += self.opt_results[step][key]['error']
-            average_result[key] = summation / len(self.opt_results.keys())
+                # Skip failed runs that are stored as np.inf
+                if isinstance(self.opt_results[step][key], dict):
+                    summation += self.opt_results[step][key]['error']
+                    valid_steps += 1
+                elif self.opt_results[step][key] == np.inf:
+                    summation += np.inf
+                    valid_steps += 1
+            if valid_steps > 0:
+                average_result[key] = summation / valid_steps
+            else:
+                average_result[key] = np.inf
         average_result = pd.Series(average_result)
         average_result = average_result.sort_values()
         best_setting = average_result.index[0]
-        self.run_settings = self.opt_results['1'][best_setting]['params']
-        self.cv_predictions = []
-        for k, v in self.opt_results.items():
-            self.cv_predictions.append(self.opt_results[k][best_setting]['predictions'])
+
+        # Check if best setting is a valid result (not a failed run)
+        if isinstance(self.opt_results['1'][best_setting], dict):
+            self.run_settings = self.opt_results['1'][best_setting]['params']
+            self.cv_predictions = []
+            for k, v in self.opt_results.items():
+                if isinstance(self.opt_results[k][best_setting], dict):
+                    self.cv_predictions.append(self.opt_results[k][best_setting]['predictions'])
+        else:
+            raise ValueError("All optimization runs failed. No valid configuration found.")
         ensemble, _ = Optimizer.combiner_check(self.run_settings, wrap_values=False)
         if ensemble:
             output = self.model_object.ensemble(self.y, **self.run_settings)

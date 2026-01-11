@@ -29,9 +29,9 @@ class FourierSeasonalityModel(SeasonalityBaseModel):
         elif isinstance(self.seasonality_weights, list):
             if self.seasonal_weights[0] is None:
                 seasonality_weights = None
-        elif self.seasonality_weights == 'regularize':
+        elif isinstance(self.seasonality_weights, str) and self.seasonality_weights == 'regularize':
             seasonality_weights = 1/(0.0001 + y**2)
-        elif self.seasonality_weights == 'explode':
+        elif isinstance(self.seasonality_weights, str) and self.seasonality_weights == 'explode':
             seasonality_weights = (y**2)
         elif callable(self.seasonality_weights):
             seasonality_weights = self.seasonality_weights(y)

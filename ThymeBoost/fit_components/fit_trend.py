@@ -206,7 +206,7 @@ class FitTrend:
                 if iteration_cost <= cost:
                     split = self.time_series_index[i]
                     cost = iteration_cost
-                    fitted = split_1_obj.append(split_2_obj)
+                    fitted = pd.concat([split_1_obj, split_2_obj])
                     self.model_obj = split_2_obj
                     self.model_params = split_2_obj.model_params
             self.split = split

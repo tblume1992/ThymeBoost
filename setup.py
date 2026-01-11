@@ -12,9 +12,9 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     description = "Gradient boosted time series decomposition for forecasting.",
-    author_email = 'tblume@mail.USF.edu', 
+    author_email = 't-blume@hotmail.com', 
     keywords = ['forecasting', 'time series', 'seasonality', 'trend'],
-      install_requires=[           
+    install_requires=[           
                         'numpy',
                         'pandas',
                         'statsmodels',

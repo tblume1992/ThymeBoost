@@ -31,6 +31,12 @@ MANIFEST
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
 *.manifest
 *.spec
+*.exe
+
+# Windows scripts and executables
+*.bat
+*.ps1
+*.cmd
 
 # Installer logs
 pip-log.txt
@@ -112,6 +118,13 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+# Virtual environment files mistakenly created in package directory
+ThymeBoost/Scripts/
+ThymeBoost/share/
+ThymeBoost/Lib/
+ThymeBoost/Include/
+ThymeBoost/pyvenv.cfg
 
 # Spyder project settings
 .spyderproject

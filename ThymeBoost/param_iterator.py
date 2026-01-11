@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-A base class which is inherited by both ensemble and optimize classes. 
+A base class which is inherited by both ensemble and optimize classes.
 Used to clean large parameter lists of illegal combinations
 """
 import numpy as np
+import pandas as pd
 
 
 class ParamIterator:
@@ -13,6 +14,31 @@ class ParamIterator:
 
     def __init__(self):
         pass
+
+    def _safe_check_in_list(self, value, value_list):
+        """
+        Safely check if a value is in a list, handling arrays/DataFrames.
+
+        Parameters
+        ----------
+        value : str
+            The value to search for
+        value_list : list
+            List of values that may contain arrays or DataFrames
+
+        Returns
+        -------
+        bool
+            True if value is in the list
+        """
+        for item in value_list:
+            try:
+                if item == value:
+                    return True
+            except (ValueError, TypeError):
+                # Skip items that can't be compared (arrays, DataFrames, etc.)
+                continue
+        return False
 
     def param_check(self, params):
         """
@@ -39,27 +65,29 @@ class ParamIterator:
             k = list(params.keys())
         else:
             exogenous = None
-        if 'ewm' not in v and 'ewm_alpha' in k:
+        if not self._safe_check_in_list('ewm', v) and 'ewm_alpha' in k:
             params['ewm_alpha'] = None
-        if ('ses' not in v and 'des' not in v and 'damped_des' not in v and 'croston' not in v) and \
+        if (not self._safe_check_in_list('ses', v) and not self._safe_check_in_list('des', v) and
+            not self._safe_check_in_list('damped_des', v) and not self._safe_check_in_list('croston', v)) and \
            ('alpha' in k):
             params['alpha'] = None
-        if ('des' not in v and 'damped_des' not in v) and \
+        if (not self._safe_check_in_list('des', v) and not self._safe_check_in_list('damped_des', v)) and \
            ('beta' in k):
             params['beta'] = None
-        if 'linear' not in v and 'trend_weights' in k:
+        if not self._safe_check_in_list('linear', v) and 'trend_weights' in k:
             params['trend_weights'] = None
-        if 'linear' not in v and 'l2' in k:
+        if not self._safe_check_in_list('linear', v) and 'l2' in k:
             params['l2'] = None
-        if ('linear' not in v and 'ransac' not in v and 'loess' not in v) and 'poly' in k:
+        if (not self._safe_check_in_list('linear', v) and not self._safe_check_in_list('ransac', v) and
+            not self._safe_check_in_list('loess', v)) and 'poly' in k:
             params['poly'] = None
         # if 'loess' not in v and 'window_size' in k and 'moving_average' not in v and 'window_size' in k:
         #     params['window_size'] = None
-        if 'fourier' not in v and 'fourier_order' in k:
+        if not self._safe_check_in_list('fourier', v) and 'fourier_order' in k:
             params['fourier_order'] = None
         if 'arima' not in str(v) and 'arima_order' in k:
             params['arima_order'] = None
-        if 'decision_tree' not in v and 'tree_depth' in k:
+        if not self._safe_check_in_list('decision_tree', v) and 'tree_depth' in k:
             params['tree_depth'] = None
         # if 'local' in v and ('loess' in v or 'ewm' in v or 'ses' in v or 'des'
         #                      in v or 'damped_des' in v or 'arima' in v):
